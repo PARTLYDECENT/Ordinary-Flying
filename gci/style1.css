@@ -1,0 +1,590 @@
+/* Base styles */
+:root {
+    --alien-bg-fallback: #0a0514; /* Deep purple/black */
+    --alien-neon-green: #00ffaa; /* Slightly softer neon green */
+    --alien-cyan: #00e5ff;
+    --alien-purple: #a040ff;
+    --alien-error-color: #ff4040; /* Red for errors */
+    --alien-dark-grey: #15151a; /* Slightly lighter dark */
+    --alien-mid-grey: #2a2a30;
+    --alien-light-grey: #44444a;
+    --alien-text: #e8e8e8;
+    --alien-text-dim: #b0b0b0;
+    --alien-glow-color: rgba(0, 255, 170, 0.4); /* Adjusted glow */
+    --alien-active-glow-color: rgba(0, 229, 255, 0.6); /* Cyan glow for active */
+    --alien-font: 'Consolas', 'Lucida Console', 'Courier New', monospace; /* Added fallbacks */
+    --blur-intensity: 4px; /* Slightly reduced default blur */
+    --window-border-radius: 3px; /* Consistent rounding */
+    --control-button-size: 20px; /* Control button dimensions */
+    --taskbar-height: 38px; /* Taskbar height */
+}
+
+/* Reset and Base */
+*, *::before, *::after {
+    box-sizing: border-box; /* Better box model */
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%; /* Ensure full width */
+    font-family: var(--alien-font);
+    overflow: hidden; /* Prevent body scrollbars */
+    background-color: var(--alien-bg-fallback); /* Fallback color */
+    color: var(--alien-text);
+    /* Improve font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Apply background image */
+body {
+     background-image: url('bg1.jpg'); /* Make sure bg1.jpg is accessible */
+     background-size: cover;
+     background-position: center center;
+     background-repeat: no-repeat;
+     background-attachment: fixed; /* Keep bg fixed */
+}
+
+/* Allow focus outlines for accessibility (can be customized) */
+*:focus {
+    outline: 2px solid var(--alien-cyan);
+    outline-offset: 1px;
+}
+/* Remove outline from elements that shouldn't typically have it */
+.window:focus, .window-titlebar:focus {
+     outline: none;
+}
+
+
+/* Desktop and App Container */
+#desktop {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+#app-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* Full height minus taskbar */
+    height: calc(100% - var(--taskbar-height));
+    overflow: hidden; /* Contains windows */
+     /* Perspective for potential 3D effects on windows */
+     /* perspective: 1200px; */
+}
+
+/* Taskbar */
+#taskbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--taskbar-height);
+    /* Frosted glass effect */
+    background-color: rgba(21, 21, 26, 0.75); /* Slightly more opaque */
+    backdrop-filter: blur(var(--blur-intensity));
+    -webkit-backdrop-filter: blur(var(--blur-intensity)); /* Safari */
+    border-top: 1px solid var(--alien-neon-green);
+    display: flex;
+    align-items: center;
+    padding: 0 10px; /* Reduced padding */
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.35), 0 -1px 1px rgba(0, 255, 170, 0.25);
+    z-index: 10000;
+}
+
+/* Start Button */
+.start-button {
+    flex-shrink: 0; /* Prevent shrinking */
+    background-color: var(--alien-neon-green);
+    color: var(--alien-dark-grey);
+    border: none;
+    padding: 5px 10px;
+    margin: 0 8px 0 0; /* Adjust margin */
+    font-size: 16px;
+    border-radius: var(--window-border-radius);
+    cursor: pointer;
+    height: calc(var(--taskbar-height) - 12px); /* Fit nicely in taskbar */
+    line-height: 1;
+    text-shadow: none;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: inset 0 0 5px rgba(255,255,255,0.2);
+    display: flex; /* For icon centering */
+    align-items: center;
+    justify-content: center;
+}
+.start-button svg { /* Style SVG inside button */
+     width: 18px; height: 18px;
+}
+.start-button:hover {
+    background-color: var(--alien-cyan);
+    color: var(--alien-bg-fallback);
+    box-shadow: 0 0 12px var(--alien-cyan);
+}
+
+/* Taskbar Apps Container */
+.taskbar-apps-container {
+    display: flex;
+    flex-grow: 1; /* Take remaining space */
+    overflow: hidden; /* Hide overflow for now */
+    align-items: center;
+    height: 100%;
+    gap: 4px; /* Space between buttons */
+}
+
+/* Taskbar App Buttons */
+.taskbar-app-button {
+    background-color: rgba(42, 42, 48, 0.5); /* Mid-grey transparent */
+    border: 1px solid transparent; /* Default no border */
+    color: var(--alien-text-dim);
+    padding: 2px 8px;
+    height: calc(var(--taskbar-height) - 10px);
+    border-radius: var(--window-border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    max-width: 150px; /* Limit button width */
+    overflow: hidden;
+    transition: all 0.15s ease-in-out;
+    flex-shrink: 0; /* Prevent shrinking initially */
+}
+.taskbar-app-icon {
+    width: 20px; height: 20px; margin-right: 6px;
+    flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+}
+.taskbar-app-icon svg { width: 16px; height: 16px; }
+.taskbar-app-title {
+    font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.taskbar-app-button:hover {
+    background-color: rgba(0, 255, 170, 0.2); /* Faint green */
+    color: var(--alien-text);
+}
+.taskbar-app-button.active {
+    background-color: rgba(0, 229, 255, 0.3); /* Cyan highlight */
+    border-color: var(--alien-cyan);
+    color: var(--alien-text);
+    font-weight: bold;
+}
+.taskbar-app-button.minimized {
+    opacity: 0.7;
+    border: 1px dashed var(--alien-light-grey);
+    background-color: rgba(42, 42, 48, 0.3);
+}
+ .taskbar-app-button.minimized:hover {
+    opacity: 1;
+    border-style: solid;
+     border-color: var(--alien-neon-green);
+     background-color: rgba(0, 255, 170, 0.2);
+ }
+
+
+/* Start Menu */
+.start-menu {
+    position: absolute;
+    bottom: var(--taskbar-height); /* Position above taskbar */
+    left: 0;
+    width: 320px; /* Wider */
+    max-height: 400px; /* Limit height */
+    overflow-y: auto; /* Scroll if too many items */
+    /* Frosted glass */
+    background-color: rgba(21, 21, 26, 0.9); /* More opaque */
+    backdrop-filter: blur(calc(var(--blur-intensity) * 1.5)); /* More blur for menu */
+     -webkit-backdrop-filter: blur(calc(var(--blur-intensity) * 1.5));
+    border: 1px solid var(--alien-neon-green);
+    border-bottom: none;
+    border-radius: var(--window-border-radius) var(--window-border-radius) 0 0; /* Rounded top corners */
+    padding: 8px 0;
+    box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.45);
+    z-index: 9999;
+    display: none; /* Initially hidden */
+    /* Custom scrollbar for start menu */
+    scrollbar-width: thin;
+    scrollbar-color: var(--alien-neon-green) rgba(42, 42, 48, 0.5);
+}
+.start-menu::-webkit-scrollbar { width: 8px; }
+.start-menu::-webkit-scrollbar-track { background: rgba(42, 42, 48, 0.5); border-radius: 0 var(--window-border-radius) 0 0; }
+.start-menu::-webkit-scrollbar-thumb { background: var(--alien-neon-green); border-radius: 0; }
+.start-menu::-webkit-scrollbar-thumb:hover { background: var(--alien-cyan); }
+
+.start-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 9px 20px; /* Slightly more padding */
+    color: var(--alien-cyan);
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+     border-left: 4px solid transparent; /* Indicator */
+     text-decoration: none; /* Remove underline if it's an anchor */
+}
+.start-menu-item:hover, .start-menu-item:focus {
+    background-color: var(--alien-neon-green);
+    color: var(--alien-dark-grey);
+    border-left-color: var(--alien-cyan);
+    outline: none; /* Remove focus outline for hover effect */
+}
+.start-menu-icon {
+    margin-right: 14px;
+    font-size: 18px;
+    width: 24px; height: 24px; /* Ensure consistent icon size */
+    text-align: center;
+    color: var(--alien-neon-green);
+    transition: color 0.15s ease-in-out;
+    display: inline-flex; /* Center icon */
+    align-items: center;
+    justify-content: center;
+}
+.start-menu-icon svg { width: 20px; height: 20px; } /* Control icon size */
+ .start-menu-item:hover .start-menu-icon,
+ .start-menu-item:focus .start-menu-icon {
+     color: var(--alien-dark-grey);
+ }
+.start-menu-title {
+    flex-grow: 1;
+    white-space: nowrap; /* Prevent wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Desktop icons */
+.desktop-icons {
+    position: absolute; top: 25px; left: 25px;
+    display: grid; /* Use grid for alignment */
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); /* Responsive columns */
+    gap: 20px;
+    max-width: 100px; /* Limit width to force vertical stacking initially */
+    z-index: 10;
+}
+.desktop-icon {
+    width: 85px; /* Fixed width */
+    height: 95px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--alien-text);
+    text-shadow: 0 0 8px var(--alien-cyan), 0 0 3px var(--alien-cyan); /* Enhanced glow */
+    text-align: center; border-radius: var(--window-border-radius);
+    padding: 5px; box-sizing: border-box;
+    transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    border: 1px solid transparent; /* For hover */
+    user-select: none; /* Prevent text selection */
+}
+.desktop-icon:hover {
+    background-color: rgba(0, 255, 170, 0.2); /* Faint neon green bg */
+    border-color: rgba(0, 255, 170, 0.6);
+    transform: scale(1.03); /* Slight scale up */
+    box-shadow: 0 0 12px rgba(0, 255, 170, 0.4);
+}
+ .desktop-icon:active {
+    transform: scale(0.98); /* Click feedback */
+     background-color: rgba(0, 255, 170, 0.3);
+ }
+.icon-image {
+    font-size: 36px; /* Slightly larger */
+    margin-bottom: 8px;
+     width: 40px; height: 40px; /* Container for icon */
+     display: flex; align-items: center; justify-content: center;
+}
+.icon-image svg { max-width: 100%; max-height: 100%; } /* Ensure SVG fits */
+.icon-title {
+    font-size: 12px; word-break: break-word; line-height: 1.3;
+    max-height: 2.6em; /* Limit to 2 lines */
+    overflow: hidden;
+}
+
+/* --- Window Styles --- */
+.window {
+    background-color: transparent; /* Rely on content/titlebar backgrounds */
+    border-radius: var(--window-border-radius);
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--alien-light-grey);
+    overflow: hidden; /* Needed for resize and border-radius */
+    position: absolute;
+    /* min-width/height set via JS */
+    display: flex;
+    flex-direction: column;
+    resize: none; /* Disable native resize, using JS */
+    border: none;
+    transition: box-shadow 0.25s ease-in-out, transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+     /* contain: strict; /* Can potentially improve performance but might break some layouts */
+     opacity: 1;
+     transform: scale(1);
+}
+/* Style for window being dragged (optional) */
+/* .window.dragging { opacity: 0.85; transform: scale(1.02); } */
+
+.window.active {
+     /* Enhanced active shadow/glow */
+     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.65), 0 0 0 1.5px var(--alien-cyan), 0 0 20px var(--alien-active-glow-color);
+     z-index: 500 !important; /* Ensure active window is visually on top (JS handles actual z-index increment) */
+}
+
+.window.maximized {
+    border-radius: 0; /* No rounded corners when maximized */
+    box-shadow: none; /* Remove shadow when maximized */
+    border: 1px solid var(--alien-dark-grey); /* Minimal border */
+    /* Dimensions set by JS */
+}
+
+
+/* Window Titlebar */
+.window-titlebar {
+    /* Frosted glass */
+    background-color: rgba(42, 42, 48, 0.75);
+    backdrop-filter: blur(var(--blur-intensity));
+     -webkit-backdrop-filter: blur(var(--blur-intensity));
+    border-bottom: 1px solid var(--alien-light-grey);
+    padding: 0 10px; /* Align padding */
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: grab; /* Default cursor for draggable */
+    user-select: none;
+    height: 32px; /* Slightly taller title bar */
+    box-sizing: border-box; flex-shrink: 0;
+    color: var(--alien-text);
+    border-radius: var(--window-border-radius) var(--window-border-radius) 0 0; /* Match window rounding */
+     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
+}
+.window.active .window-titlebar {
+    background-color: rgba(0, 229, 255, 0.85); /* Cyan active titlebar */
+     backdrop-filter: blur(calc(var(--blur-intensity) * 1.2)); /* Slightly more blur */
+     -webkit-backdrop-filter: blur(calc(var(--blur-intensity) * 1.2));
+    color: var(--alien-dark-grey);
+    border-bottom-color: var(--alien-cyan);
+    text-shadow: 0 0 3px rgba(0,0,0,0.15);
+}
+.window.maximized .window-titlebar {
+     border-radius: 0;
+     cursor: default; /* No grab cursor when maximized */
+}
+
+.window-title-icon {
+    width: 20px; height: 20px; margin-right: 8px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    opacity: 0.8;
+}
+.window-title-icon svg { width: 16px; height: 16px; }
+.window.active .window-title-icon { opacity: 1; }
+.window-title {
+    font-size: 14px; font-weight: bold;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    flex-grow: 1; /* Take available space */
+    padding-right: 10px; /* Space before controls */
+}
+
+/* Window Controls */
+.window-controls { display: flex; gap: 6px; flex-shrink: 0; }
+.window-controls button {
+    width: var(--control-button-size); height: var(--control-button-size);
+    border: 1px solid var(--alien-light-grey);
+    background: rgba(60, 60, 65, 0.6); /* Slightly darker controls bg */
+    border-radius: 2px;
+    font-size: 11px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; line-height: 1; padding: 0;
+    color: var(--alien-text-dim);
+    transition: all 0.15s ease-in-out;
+    flex-shrink: 0;
+}
+ .window-controls button svg { width: 12px; height: 12px; } /* Control icon size */
+
+/* Active window controls */
+.window.active .window-controls button {
+     border-color: var(--alien-dark-grey);
+     background: rgba(21, 21, 26, 0.7);
+     color: var(--alien-dark-grey); /* Icons become dark */
+}
+/* Hover states */
+.window-controls button:hover {
+    border-color: var(--alien-neon-green);
+    background-color: var(--alien-neon-green);
+    color: var(--alien-dark-grey);
+}
+.window.active .window-controls button:hover {
+    background-color: var(--alien-purple);
+    color: var(--alien-text);
+     border-color: var(--alien-purple);
+}
+/* Close button specific hover */
+.window-controls button.window-close:hover {
+    background-color: var(--alien-error-color) !important;
+    color: white !important;
+    border-color: var(--alien-error-color) !important;
+}
+
+/* Window Content Area */
+.window-content {
+    padding: 0; /* Remove default padding, apps should manage their own */
+    overflow: auto; /* Enable scrolling */
+    flex-grow: 1; /* Take remaining vertical space */
+    /* Frosted glass content area */
+    background-color: rgba(21, 21, 26, 0.8); /* Darker content bg */
+     backdrop-filter: blur(var(--blur-intensity));
+     -webkit-backdrop-filter: blur(var(--blur-intensity));
+    display: flex; /* Use flex for app layout */
+    flex-direction: column;
+     color: var(--alien-text);
+     border-radius: 0 0 var(--window-border-radius) var(--window-border-radius); /* Match window rounding */
+     /* Fix potential blur/overflow issue with border-radius */
+     -webkit-mask-image: radial-gradient(white, black);
+}
+.window.maximized .window-content { border-radius: 0; }
+
+/* Custom Scrollbars (Webkit/Blink) */
+ .window-content::-webkit-scrollbar { width: 10px; height: 10px; }
+.window-content::-webkit-scrollbar-track { background: rgba(42, 42, 48, 0.6); border-left: 1px solid var(--alien-light-grey); border-radius: 0 0 var(--window-border-radius) 0; }
+.window-content::-webkit-scrollbar-thumb { background: var(--alien-neon-green); border-radius: 0; }
+.window-content::-webkit-scrollbar-thumb:hover { background: var(--alien-cyan); }
+ /* Firefox scrollbar styling (basic) */
+.window-content { scrollbar-width: thin; scrollbar-color: var(--alien-neon-green) rgba(42, 42, 48, 0.6); }
+
+/* Window Resize Handle (Optional) */
+.window-resize-handle {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 15px; height: 15px;
+    cursor: nwse-resize;
+    /* Optional: Add a visual indicator */
+    /* background: linear-gradient(135deg, transparent 0%, transparent 50%, var(--alien-light-grey) 50%, var(--alien-light-grey) 100%); */
+    /* border-top: 1px solid var(--alien-light-grey); */
+    /* border-left: 1px solid var(--alien-light-grey); */
+    z-index: 10; /* Ensure it's above content */
+}
+.window.maximized .window-resize-handle { display: none; } /* Hide when maximized */
+
+
+/* --- Application Specific Styles --- */
+
+/* GHOST (Notepad) App Styles */
+.ghost-app { display: flex; flex-direction: column; height: 100%; width: 100%; }
+.ghost-toolbar {
+     padding: 6px 12px; /* More padding */
+     /* Frosted Glass Toolbar */
+     background-color: rgba(42, 42, 48, 0.7);
+     backdrop-filter: blur(var(--blur-intensity));
+     -webkit-backdrop-filter: blur(var(--blur-intensity));
+     border-bottom: 1px solid var(--alien-light-grey);
+     flex-shrink: 0; display: flex; align-items: center; gap: 8px;
+}
+ .ghost-toolbar button {
+      padding: 4px 10px; font-size: 12px;
+     background-color: var(--alien-mid-grey);
+     color: var(--alien-neon-green);
+     border: 1px solid var(--alien-neon-green);
+     border-radius: var(--window-border-radius); cursor: pointer;
+     transition: all 0.15s ease;
+ }
+ .ghost-toolbar button:hover {
+     background-color: var(--alien-neon-green); color: var(--alien-dark-grey);
+     box-shadow: 0 0 5px var(--alien-neon-green);
+ }
+ .ghost-toolbar .ghost-status { margin-left: auto; font-size: 11px; color: var(--alien-text-dim); }
+.ghost-textarea-container { flex-grow: 1; padding: 0; overflow: hidden; display: flex; }
+.ghost-textarea {
+    width: 100%; height: 100%; border: none; resize: none; outline: none;
+    font-family: var(--alien-font); font-size: 14px; line-height: 1.6; box-sizing: border-box;
+    background-color: transparent; /* See through window content bg */
+    color: var(--alien-text); padding: 12px; /* Padding inside textarea */
+    caret-color: var(--alien-neon-green);
+}
+
+/* Calculator App Styles */
+ .calculator-app-container { padding: 15px; height: 100%; box-sizing: border-box; background-color: transparent; }
+.calculator-app { display: flex; flex-direction: column; height: 100%; }
+.calc-display {
+    width: 100%; padding: 12px; font-size: 26px; text-align: right; margin-bottom: 15px;
+    background-color: rgba(10, 5, 20, 0.85); /* Darker transparent display */
+    border: 1px solid var(--alien-cyan); box-sizing: border-box; font-family: var(--alien-font);
+     color: var(--alien-neon-green); border-radius: var(--window-border-radius);
+     box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.35); /* Inner cyan glow */
+     overflow: hidden; /* Prevent text overflow issues */
+     white-space: nowrap;
+     text-overflow: ellipsis; /* Show ellipsis if too long (though JS limits length) */
+}
+.calc-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; flex-grow: 1; }
+.calc-buttons button {
+    padding: 14px 5px; font-size: 16px;
+    border: 1px solid var(--alien-mid-grey);
+    background-color: var(--alien-mid-grey); color: var(--alien-neon-green);
+    cursor: pointer; border-radius: var(--window-border-radius); transition: all 0.15s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+.calc-buttons button:hover {
+    border-color: var(--alien-neon-green);
+    background-color: var(--alien-neon-green); color: var(--alien-dark-grey);
+    box-shadow: 0 0 10px var(--alien-neon-green);
+}
+.calc-buttons button:active { transform: scale(0.96); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+ .calc-buttons .equals {
+     grid-column: span 2; background-color: var(--alien-neon-green); color: var(--alien-dark-grey); font-weight: bold;
+ }
+ .calc-buttons .equals:hover { background-color: var(--alien-cyan); border-color: var(--alien-cyan); box-shadow: 0 0 12px var(--alien-cyan); }
+
+/* File Explorer App Styles */
+.file-explorer-app-container { padding: 15px; height: 100%; box-sizing: border-box; background-color: transparent; }
+.file-explorer-app { font-family: var(--alien-font); font-size: 13px; height: 100%; display: flex; flex-direction: column; }
+ .file-explorer-pathbar {
+      width: 100%; margin-bottom: 8px; border: 1px solid var(--alien-light-grey);
+      background-color: rgba(10, 5, 20, 0.8); color: var(--alien-cyan);
+      padding: 6px 10px; box-sizing: border-box; flex-shrink: 0;
+      border-radius: var(--window-border-radius); font-size: 12px;
+      box-shadow: inset 0 0 6px rgba(0, 229, 255, 0.25);
+      outline: none; /* Remove default focus outline */
+ }
+ .file-explorer-pathbar:focus { border-color: var(--alien-cyan); }
+ .file-explorer-content { flex-grow: 1; overflow: hidden; display: flex; border: 1px solid var(--alien-light-grey); border-radius: var(--window-border-radius); }
+.file-explorer-list {
+    list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1;
+     background-color: transparent; /* Let window content bg show */
+     scrollbar-width: thin;
+     scrollbar-color: var(--alien-neon-green) rgba(42, 42, 48, 0.5);
+ }
+ .file-explorer-list::-webkit-scrollbar { width: 8px; }
+ .file-explorer-list::-webkit-scrollbar-track { background: rgba(42, 42, 48, 0.5); }
+ .file-explorer-list::-webkit-scrollbar-thumb { background: var(--alien-neon-green); border-radius: 0; }
+ .file-explorer-list::-webkit-scrollbar-thumb:hover { background: var(--alien-cyan); }
+
+ .file-explorer-list li {
+    padding: 6px 12px; display: flex; align-items: center;
+    border-bottom: 1px solid var(--alien-mid-grey); /* Darker separator */
+     color: var(--alien-text-dim); transition: background-color 0.15s, color 0.15s;
+     cursor: default; /* Default cursor */
+     white-space: nowrap; /* Prevent wrapping */
+     overflow: hidden; text-overflow: ellipsis;
+ }
+ .file-explorer-list li:last-child { border-bottom: none; }
+ .file-explorer-list li[data-clickable="true"] { cursor: pointer; }
+ .file-explorer-list li[data-clickable="true"]:hover {
+     background-color: rgba(0, 255, 170, 0.18);
+     color: var(--alien-cyan);
+ }
+ .file-explorer-list li .icon {
+    margin-right: 10px; width: 22px; height: 22px; text-align: center;
+    color: var(--alien-neon-green); flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+ }
+ .file-explorer-list li .icon svg { width: 18px; height: 18px; }
+ .file-explorer-list li.unsupported-item { opacity: 0.6; }
+ .file-explorer-list li.loading-placeholder,
+ .file-explorer-list li.empty-placeholder,
+ .file-explorer-list li.error-message {
+     color: var(--alien-text-dim); font-style: italic; justify-content: center; padding: 15px;
+     cursor: default; background: none;
+ }
+ .file-explorer-list li.error-message { color: var(--alien-error-color); font-style: normal; }
+
+ .file-explorer-statusbar {
+    flex-shrink: 0; padding: 4px 10px; font-size: 11px; color: var(--alien-text-dim);
+    border-top: 1px solid var(--alien-light-grey);
+    background-color: rgba(42, 42, 48, 0.6);
+    text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+ }
+
+ /* Media Viewer Specific */
+ .media-viewer-window .window-content { background-color: rgba(10, 10, 10, 0.9); /* Darker BG for media */ }
+ .media-error { color: var(--alien-error-color); text-align: center; padding: 30px; font-size: 14px; }
+
+
+ /* Dynamic App Placeholder */
+ .dynamic-app-container { padding: 20px; }

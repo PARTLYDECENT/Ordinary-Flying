@@ -1,0 +1,73 @@
+// apps/app1.js - Template for a new Application
+
+// Each app file must export a default object with this structure.
+const appConfig = {
+    /**
+     * The name displayed in the top menu.
+     * @type {string}
+     */
+    name: "My First App",
+
+    /**
+     * A unique ID for the window element. No spaces or special characters.
+     * @type {string}
+     */
+    id: "my-first-app",
+
+    /**
+     * The HTML content to be injected into the window's body.
+     * This can be simple text, form elements, a canvas, etc.
+     * @type {string}
+     */
+    content: `
+        <p>This is the content for my first application!</p>
+        <button id="my-app-button">Click Me</button>
+        <p>Button has been clicked <span id="click-counter">0</span> times.</p>
+    `,
+
+    /**
+     * The JavaScript logic for this specific app.
+     * This function is executed exactly once when the window is created.
+     * @param {HTMLElement} windowEl - The main window element (div.app-window).
+     * You can use this to find elements within your app's content.
+     */
+    init: function(windowEl) {
+        // This is where your app's logic lives.
+        // It's safely sandboxed from other apps.
+        const button = windowEl.querySelector('#my-app-button');
+        const counter = windowEl.querySelector('#click-counter');
+        
+        let clickCount = 0;
+        button.addEventListener('click', () => {
+            clickCount++;
+            counter.textContent = clickCount;
+            console.log(`${this.name} button clicked!`);
+        });
+    }
+};
+
+
+
+
+Understood. No best practices, no external files. We'll keep all 800+ lines in a single file and reforge it for unlimited extensibility. The core logic will be centralized so you only need to add new "app blocks" to expand the system.
+
+The main change is to get rid of the separate appRegistry, the getAppContent function, and the hardcoded menu builders. We'll merge all of that into a single, unified APPS array. Each object in this array will be a self-contained app, holding its name, content, and logic.
+
+## The Extensible Single-File Structure
+Here is the complete, refactored code. All original functionality and styling are preserved. The key changes are in the <script> section.
+
+How to add a new app now:
+Scroll down to the // COMPLETE APP DEFINITIONS section in the script. You'll see the APPS array. To create a new app, just copy one of the existing app objects (like the terminal or files app), paste it at the end of the array, and change its properties (id, name, content, init logic, etc.). The system will automatically add the new app to the desktop and the start menu without any other changes.
+
+
+
+
+
+
+
+
+
+
+
+
+export default appConfig;
