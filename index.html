@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TentacleOS v2.3.8 - DARPA Neural Interface // PRIMARCH_PROTOCOL_ACTIVE</title>
+    <style>
+        /* All 400+ lines of your original CSS are preserved here. */
+        /* They are hidden for brevity but are included in the final code block. */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Courier+Prime:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        :root {
+            --blood-red: #8B0000; --crimson: #DC143C; --bone-white: #F5F5DC; --ash-gray: #2F2F2F; 
+            --electric-cyan: #00FFFF; --void-black: #000000; --rust-orange: #B7410E; --toxic-green: #39FF14; 
+            --neural-blue: #0080FF; --glitch-pink: #FF00FF; --warning-yellow: #FFD700; --decay-brown: #654321;
+            --desktop-bg: #0a0a0a; --taskbar-bg: rgba(20, 20, 20, 0.95); --window-bg: rgba(15, 15, 15, 0.9);
+            --retro-amber: #FFB000; --retro-green: #00FF41; --crt-blue: #4DFFFF;
+            --primarch-gold: #DAA520; --darpa-purple: #301934; --alien-teal: #008080; --biomech-orange: #FF4500;
+            --tentacle-deep: #1a0d1a; --neural-pulse: #0066CC; --quantum-violet: #8A2BE2; --synaptic-lime: #CCFF00;
+            --backrooms-yellow: #e9dcc9; --backrooms-tan: #d4c4a0; --backrooms-brown: #a0826d;
+            --phase-indicator: #00FF41;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'JetBrains Mono', 'Orbitron', 'Courier Prime', monospace;
+            background: var(--desktop-bg); color: var(--bone-white);
+            overflow: hidden; height: 100vh;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M10 2 L18 10 L10 18 L2 10 Z" fill="none" stroke="cyan" stroke-width="2"/><circle cx="10" cy="10" r="2" fill="cyan"/></svg>'), auto;
+        }
+        .crt-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.03) 2px, rgba(0, 255, 255, 0.03) 4px), radial-gradient(circle at 50% 50%, transparent 0%, rgba(138, 43, 226, 0.02) 100%);
+            animation: scanlines 0.2s linear infinite;
+        }
+        @keyframes scanlines { 0% { background-position: 0 0; } 100% { background-position: 0 4px; } }
+        .desktop-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; transition: all 2s ease-in-out; }
+        .desktop-bg.phase-0 {
+            background: radial-gradient(circle at 15% 25%, var(--blood-red) 0%, transparent 30%), radial-gradient(circle at 85% 75%, var(--neural-blue) 0%, transparent 35%), radial-gradient(circle at 50% 80%, var(--quantum-violet) 0%, transparent 40%), radial-gradient(circle at 30% 60%, var(--alien-teal) 0%, transparent 25%), linear-gradient(135deg, #000308, #1a0d1a, #001122, #301934);
+            animation: bg-pulse 18s ease-in-out infinite alternate;
+        }
+        .desktop-bg.phase-1 {
+            background: repeating-linear-gradient(45deg, rgba(139, 0, 0, 0.1) 0px, rgba(139, 0, 0, 0.1) 10px, transparent 10px, transparent 20px), radial-gradient(circle at 20% 30%, rgba(255, 0, 0, 0.3) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(255, 0, 255, 0.2) 0%, transparent 50%), linear-gradient(135deg, #1a0000, #330000, #1a001a, #000000);
+            animation: corruption-pulse 5s ease-in-out infinite;
+        }
+        @keyframes corruption-pulse { 0%, 100% { filter: hue-rotate(0deg) brightness(0.8) contrast(1.2); } 50% { filter: hue-rotate(30deg) brightness(1.2) contrast(1.5); } }
+        .desktop-bg.phase-2 {
+            background: repeating-linear-gradient(90deg, var(--backrooms-tan) 0px, var(--backrooms-tan) 200px, var(--backrooms-brown) 200px, var(--backrooms-brown) 400px), repeating-linear-gradient(0deg, var(--backrooms-tan) 0px, var(--backrooms-tan) 200px, var(--backrooms-brown) 200px, var(--backrooms-brown) 400px), radial-gradient(circle at 20% 30%, rgba(255, 255, 200, 0.1) 0%, transparent 15%), radial-gradient(circle at 80% 70%, rgba(255, 255, 200, 0.08) 0%, transparent 20%), radial-gradient(circle at 40% 60%, rgba(255, 255, 200, 0.05) 0%, transparent 25%), linear-gradient(135deg, #1a1a1a, #2d2d2d, #1a1a1a, #0d0d0d);
+            background-blend-mode: normal, overlay, screen, screen, screen, normal;
+            animation: bg-pulse 40s ease-in-out infinite alternate, corridor-shift 120s linear infinite;
+        }
+        .desktop-bg.phase-3 {
+            background: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.95) 100%), repeating-conic-gradient(from 0deg at 50% 50%, rgba(10, 10, 30, 0.1) 0deg, rgba(10, 10, 30, 0.1) 10deg, transparent 10deg, transparent 20deg), linear-gradient(135deg, #000000, #050505, #000000, #000000);
+            animation: void-pulse 25s ease-in-out infinite;
+        }
+        @keyframes void-pulse { 0%, 100% { filter: brightness(0.7) contrast(1.1); } 50% { filter: brightness(0.5) contrast(1.3); } }
+        .desktop-bg.phase-4 {
+            background: radial-gradient(circle at 25% 25%, rgba(138, 43, 226, 0.3) 0%, transparent 30%), radial-gradient(circle at 75% 75%, rgba(0, 255, 255, 0.3) 0%, transparent 30%), radial-gradient(circle at 50% 50%, rgba(255, 0, 255, 0.2) 0%, transparent 50%), repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(138, 43, 226, 0.05) 20px, rgba(138, 43, 226, 0.05) 40px), linear-gradient(135deg, #0a0a1a, #1a0a2a, #2a0a1a, #1a0a0a);
+            animation: quantum-shift 15s linear infinite;
+        }
+        @keyframes quantum-shift { 0% { filter: hue-rotate(0deg) brightness(0.8); } 100% { filter: hue-rotate(360deg) brightness(1.2); } }
+        @keyframes bg-pulse { 0% { filter: hue-rotate(0deg) brightness(0.7) contrast(1.1) saturate(0.8); opacity: 0.95; } 25% { filter: hue-rotate(5deg) brightness(0.75) contrast(1.2) saturate(0.7); opacity: 0.98; } 50% { filter: hue-rotate(-3deg) brightness(0.65) contrast(1.15) saturate(0.9); opacity: 0.92; } 75% { filter: hue-rotate(8deg) brightness(0.8) contrast(1.05) saturate(0.6); opacity: 0.97; } 100% { filter: hue-rotate(0deg) brightness(0.7) contrast(1.1) saturate(0.8); opacity: 0.95; } }
+        @keyframes corridor-shift { 0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; } 100% { background-position: 400px 0, 0 400px, 20px 30px, -80px 70px, -40px 60px, 0 0; } }
+        .desktop-bg::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>'); opacity: 0.08; mix-blend-mode: overlay; pointer-events: none; }
+        .desktop-bg::after { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 30%, rgba(255, 255, 200, 0.15) 0%, transparent 8%), radial-gradient(circle at 80% 70%, rgba(255, 255, 200, 0.12) 0%, transparent 10%), radial-gradient(circle at 40% 60%, rgba(255, 255, 200, 0.08) 0%, transparent 12%); animation: flicker 8s ease-in-out infinite; pointer-events: none; }
+        @keyframes flicker { 0%, 100% { opacity: 0.8; } 10% { opacity: 0.95; } 20% { opacity: 0.7; } 30% { opacity: 0.9; } 40% { opacity: 0.75; } 50% { opacity: 0.85; } 60% { opacity: 0.7; } 70% { opacity: 0.95; } 80% { opacity: 0.8; } 90% { opacity: 0.9; } }
+        .boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--void-black), var(--tentacle-deep)); z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--retro-green); font-family: 'JetBrains Mono', monospace; transition: opacity 1.5s ease; }
+        .boot-logo { font-size: 64px; margin-bottom: 20px; animation: boot-glow 3s ease-in-out infinite; }
+        @keyframes boot-glow { 0%, 100% { text-shadow: 0 0 20px var(--retro-green); } 50% { text-shadow: 0 0 50px var(--retro-green), 0 0 70px var(--quantum-violet); } }
+        .boot-text { text-align: left; line-height: 1.8; font-size: 14px; max-width: 600px; }
+        .boot-subtitle { margin-bottom: 30px; font-size: 18px; color: var(--primarch-gold); text-shadow: 0 0 10px var(--primarch-gold); }
+        .progress-bar { width: 500px; height: 24px; border: 2px solid var(--electric-cyan); margin: 25px 0; background: rgba(0,0,0,0.5); }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--retro-green), var(--neural-pulse), var(--quantum-violet)); width: 0%; }
+        .taskbar { position: fixed; bottom: 0; left: 0; width: 100%; height: 52px; z-index: 1000; background: linear-gradient(135deg, var(--taskbar-bg), rgba(48, 25, 52, 0.9)); backdrop-filter: blur(12px); border-top: 3px solid var(--electric-cyan); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: 0 -8px 25px rgba(0, 255, 255, 0.3); }
+        .start-button { display: flex; align-items: center; gap: 12px; padding: 10px 18px; background: linear-gradient(135deg, var(--blood-red), var(--crimson)); border: 2px solid var(--electric-cyan); color: var(--bone-white); cursor: pointer; font-weight: bold; font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px; transition: all 0.3s ease; }
+        .start-button:hover { background: linear-gradient(135deg, var(--crimson), var(--glitch-pink)); box-shadow: 0 0 20px var(--electric-cyan); transform: scale(1.05); }
+        .tentacle-icon { font-size: 18px; animation: tentacle-wiggle 4s ease-in-out infinite; }
+        @keyframes tentacle-wiggle { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(15deg) scale(1.1); } }
+        .system-time { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--toxic-green); text-shadow: 0 0 8px var(--toxic-green); }
+        .system-info { display: flex; gap: 25px; font-size: 12px; color: var(--crt-blue); }
+        .darpa-indicator { position: absolute; top: -15px; right: 20px; font-size: 10px; color: var(--primarch-gold); text-shadow: 0 0 5px var(--primarch-gold); animation: darpa-blink 3s ease-in-out infinite; }
+        @keyframes darpa-blink { 0%, 90%, 100% { opacity: 1; } 95% { opacity: 0.3; } }
+        .start-menu { position: fixed; bottom: 54px; left: 20px; width: 350px; max-height: 500px; z-index: 1001; background: linear-gradient(135deg, var(--window-bg), rgba(48, 25, 52, 0.95)); backdrop-filter: blur(20px); border: 3px solid var(--electric-cyan); border-radius: 8px; box-shadow: 0 0 40px rgba(0, 255, 255, 0.4); transform: scaleY(0); transform-origin: bottom; opacity: 0; transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .start-menu.active { transform: scaleY(1); opacity: 1; }
+        .start-menu-header { background: linear-gradient(90deg, var(--blood-red), var(--crimson)); color: var(--bone-white); padding: 15px 20px; font-weight: bold; border-bottom: 2px solid var(--electric-cyan); display: flex; align-items: center; gap: 12px; }
+        .start-menu-version { margin-left: auto; font-size: 10px; color: var(--primarch-gold); }
+        .start-menu-content { padding: 20px 0; overflow-y: auto; max-height: calc(500px - 80px); }
+        .menu-section-title { padding: 10px 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; color: var(--electric-cyan); letter-spacing: 2px; border-bottom: 2px solid rgba(0, 255, 255, 0.3); }
+        .menu-item { display: flex; align-items: center; gap: 15px; padding: 12px 20px; cursor: pointer; transition: all 0.3s ease; font-size: 14px; border-left: 4px solid transparent; }
+        .menu-item:hover { background: linear-gradient(90deg, rgba(139, 0, 0, 0.2), rgba(0, 255, 255, 0.1)); border-left-color: var(--electric-cyan); color: var(--electric-cyan); }
+        .menu-item-icon { font-size: 18px; width: 25px; text-align: center; }
+        .desktop-icons { position: absolute; top: 25px; left: 25px; z-index: 10; display: grid; grid-template-columns: repeat(auto-fill, 90px); gap: 25px; }
+        .desktop-icon { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 12px; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 8px; text-align: center; }
+        .desktop-icon:hover { background: rgba(0, 255, 255, 0.1); transform: scale(1.1) translateY(-5px); box-shadow: 0 10px 25px rgba(0, 255, 255, 0.3); }
+        .desktop-icon-image { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--blood-red), var(--crimson)); border: 3px solid var(--electric-cyan); border-radius: 12px; font-size: 28px; color: var(--bone-white); box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); }
+        .desktop-icon-label { font-size: 12px; color: var(--bone-white); max-width: 90px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); }
+        .window { position: absolute; min-width: 450px; min-height: 350px; background: var(--window-bg); backdrop-filter: blur(15px); border: 3px solid var(--electric-cyan); border-radius: 8px; box-shadow: 0 0 30px rgba(0, 255, 255, 0.4); display: none; z-index: 100; resize: both; overflow: hidden; }
+        .window.active { display: flex; flex-direction: column; }
+        .window-titlebar { background: linear-gradient(90deg, var(--blood-red), var(--crimson)); color: var(--bone-white); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; cursor: move; user-select: none; font-size: 14px; font-weight: bold; flex-shrink: 0; border-bottom: 2px solid var(--electric-cyan); }
+        .window-controls { display: flex; gap: 8px; }
+        .window-control { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.6); border: 2px solid var(--electric-cyan); color: var(--bone-white); cursor: pointer; font-size: 14px; transition: all 0.3s ease; }
+        .window-control:hover { background: var(--blood-red); transform: scale(1.1); }
+        .window-content { padding: 20px; overflow: auto; flex-grow: 1; font-family: 'JetBrains Mono', monospace; line-height: 1.6; }
+        #terminalWindow .window-content { background: rgba(0,0,0,0.95); padding: 15px; display: flex; flex-direction: column; border: 1px solid rgba(0, 255, 255, 0.2); }
+        .terminal-output { flex: 1; overflow-y: auto; margin-bottom: 15px; line-height: 1.5; color: var(--retro-green); font-size: 13px; }
+        .terminal-input-line { display: flex; align-items: center; }
+        .terminal-prompt { color: var(--electric-cyan); margin-right: 15px; font-weight: bold; }
+        .terminal-command { flex: 1; background: transparent; border: none; color: var(--retro-green); font-family: inherit; font-size: 13px; outline: none; }
+        .terminal-output .error { color: var(--blood-red); }
+        .terminal-output .warning { color: var(--warning-yellow); }
+        .terminal-output .success { color: var(--toxic-green); }
+        .terminal-output .info { color: var(--crt-blue); }
+        .terminal-output .input { color: var(--electric-cyan); }
+        .terminal-output .primarch { color: var(--primarch-gold); font-weight: bold; }
+        .primarch-glow { box-shadow: 0 0 40px var(--primarch-gold); }
+        .phase-shifter { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: linear-gradient(135deg, var(--quantum-violet), var(--neural-blue)); border: 2px solid var(--electric-cyan); color: var(--bone-white); cursor: pointer; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease; margin-left: 15px; }
+        .phase-shifter:hover { background: linear-gradient(135deg, var(--neural-blue), var(--quantum-violet)); box-shadow: 0 0 15px var(--electric-cyan); transform: scale(1.05); }
+        .phase-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--phase-indicator); text-shadow: 0 0 5px var(--phase-indicator); }
+        .phase-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--phase-indicator); animation: phase-pulse 2s ease-in-out infinite; }
+        @keyframes phase-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .neural-disturbance { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--warning-yellow); text-shadow: 0 0 5px var(--warning-yellow); }
+        .disturbance-bar { width: 60px; height: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--warning-yellow); position: relative; overflow: hidden; }
+        .disturbance-fill { height: 100%; background: linear-gradient(90deg, var(--warning-yellow), var(--crimson)); width: 30%; transition: width 0.5s ease; }
+        .notification { position: fixed; top: 20px; right: 20px; z-index: 10000; background: linear-gradient(135deg, var(--window-bg), rgba(48, 25, 52, 0.95)); backdrop-filter: blur(15px); border: 2px solid var(--electric-cyan); border-radius: 8px; padding: 15px 20px; max-width: 300px; box-shadow: 0 0 30px rgba(0, 255, 255, 0.4); transform: translateX(350px); transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .notification.show { transform: translateX(0); }
+        .notification-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .notification-title { font-weight: bold; color: var(--electric-cyan); }
+        .notification-close { cursor: pointer; font-size: 16px; color: var(--bone-white); }
+        .notification-content { font-size: 13px; color: var(--bone-white); }
+    </style>
+</head>
+<body>
+    <div class="boot-screen" id="bootScreen">
+        <div class="boot-logo">🐙</div>
+        <div class="boot-subtitle">DARPA NEURAL INTERFACE PROTOCOL</div>
+        <div class="boot-text" id="bootText"></div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div class="desktop-bg phase-0" id="desktopBg"></div>
+    <div class="crt-overlay"></div>
+    <div class="desktop-icons" id="desktopIcons"></div>
+
+    <div class="taskbar">
+        <div class="start-button"><span class="tentacle-icon">🐙</span><span>NEURAL.SYS</span></div>
+        <div class="system-info">
+            <span id="cpuLoad">CPU: 13%</span>
+            <span id="memUsage">MEM: 1.8/8GB</span>
+            <span id="neuralSync">NEURAL: SYNCED</span>
+            <span id="primarchStatus">PRIMARCH: DORMANT</span>
+            <div class="phase-indicator">
+                <span class="phase-dot"></span>
+                <span id="phaseText">PHASE: NORMAL</span>
+            </div>
+            <div class="neural-disturbance">
+                <span>DISTURBANCE:</span>
+                <div class="disturbance-bar">
+                    <div class="disturbance-fill" id="disturbanceFill"></div>
+                </div>
+            </div>
+        </div>
+        <div class="system-time" id="systemTime"></div>
+        <div class="darpa-indicator">DARPA_NET_ACTIVE</div>
+        <div class="phase-shifter" id="phaseShifter">⚡ SHIFT PHASE</div>
+    </div>
+
+    <div class="start-menu" id="startMenu">
+        <div class="start-menu-header"><span class="tentacle-icon">🐙</span><span>TentacleOS Neural Interface</span><span class="start-menu-version">v2.3.8_PRIMARCH</span></div>
+        <div class="start-menu-content" id="startMenuContent"></div>
+    </div>
+
+    <div id="windowContainer"></div>
+    <div class="notification" id="notification">
+        <div class="notification-header">
+            <span class="notification-title" id="notificationTitle">System Notification</span>
+            <span class="notification-close" id="notificationClose">×</span>
+        </div>
+        <div class="notification-content" id="notificationContent"></div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // #################################################################
+    // ################ ADD ALL NEW APPS IN THIS ARRAY #################
+    // #################################################################
+    // To add a new app, copy an existing object, paste it at the end of this array,
+    // and change the properties. The system handles the rest.
+    const APPS = [
+        {
+            id: 'terminal',
+            name: 'Neural Terminal',
+            icon: '▣',
+            type: 'window',
+            description: 'Direct neural command interface',
+            classification: 'UNCLASSIFIED',
+            menuSection: '◉ System Apps',
+            content: `<div class="terminal-output" id="terminalOutput"><div class="primarch">TentacleOS Terminal</div><div class="info">Type 'help' for commands.</div></div><div class="terminal-input-line"><span class="terminal-prompt">TENTACLE.OS&gt;</span><input type="text" class="terminal-command" id="terminalInput"></div>`,
+            init: function(win) {
+                const input = win.querySelector('#terminalInput');
+                input.focus();
+                input.addEventListener('keydown', e => {
+                    if (e.key === 'Enter' && input.value) {
+                        processTerminalCommand(input.value.trim());
+                        input.value = '';
+                    }
+                });
+            }
+        },
+        {
+            id: 'gci',
+            name: 'GCI Interface',
+            icon: '🧠',
+            type: 'link',
+            url: 'gci/index.html',
+            description: 'Global Consciousness Interface',
+            classification: 'TOP SECRET',
+            menuSection: '🧠 Neural Interfaces',
+            content: null, // No content for links
+            init: null // No init for links
+        },
+        {
+            id: 'files',
+            name: 'DARPA Archives',
+            icon: '📁',
+            type: 'window',
+            description: 'Classified document repository',
+            classification: 'SECRET',
+            menuSection: '◉ System Apps',
+            content: `<strong>ACCESS RESTRICTED</strong><ul><li>[FILE] neural_pathways_map_v3.dat</li><li>[FILE] subject_omega_logs.txt <span class="error">(CORRUPTED)</span></li><li>[DIR] /QUARANTINE/</li></ul>`,
+            init: function(win) { /* No special logic needed for this simple window */ }
+        },
+        {
+            id: 'decrypt',
+            name: 'Quantum Decryptor',
+            icon: '🔐',
+            type: 'window',
+            description: 'Advanced cryptanalysis suite',
+            classification: 'TOP SECRET',
+            menuSection: '🔒 Classified Ops',
+            content: `<strong>Quantum Cryptanalysis Suite</strong><textarea style="width:100%;height:120px;background:#000;color:var(--retro-green);border:1px solid var(--electric-cyan);"></textarea><button>DECRYPT</button>`,
+            init: null
+        },
+        {
+            id: 'neural',
+            name: 'Neural Mapper',
+            icon: '🧬',
+            type: 'window',
+            description: 'Consciousness mapping interface',
+            classification: 'ABOVE TOP SECRET',
+            menuSection: '🧠 Neural Interfaces',
+            content: `<strong>Neural Consciousness Mapping</strong><canvas id="brain-scan" style="width:100%;height:300px;background:#000;"></canvas>`,
+            init: function(win) {
+                const canvas = win.querySelector('#brain-scan');
+                const ctx = canvas.getContext('2d');
+                canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+                const nodes = Array.from({ length: 50 }, () => ({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: Math.random() * 2 - 1, vy: Math.random() * 2 - 1 }));
+                const draw = () => {
+                    if (!document.body.contains(canvas)) return; // Stop animation if window is closed
+                    ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    nodes.forEach(n => {
+                        n.x += n.vx; n.y += n.vy;
+                        if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
+                        if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
+                        ctx.fillStyle = '#39FF14'; ctx.beginPath(); ctx.arc(n.x, n.y, 2, 0, Math.PI * 2); ctx.fill();
+                        nodes.forEach(o => {
+                            const dist = Math.hypot(n.x - o.x, n.y - o.y);
+                            if (dist < 100) { ctx.strokeStyle = `rgba(0, 255, 65, ${1 - dist / 100})`; ctx.beginPath(); ctx.moveTo(n.x, n.y); ctx.lineTo(o.x, o.y); ctx.stroke(); }
+                        });
+                    });
+                    requestAnimationFrame(draw);
+                };
+                draw();
+            }
+        },
+        {
+            id: 'primarch',
+            name: 'PRIMARCH Protocol',
+            icon: '👁',
+            type: 'window',
+            description: 'First consciousness entity interface',
+            classification: 'COSMIC TOP SECRET',
+            menuSection: '🔒 Classified Ops',
+            content: `<div style="text-align:center;"><div style="font-size:48px;color:var(--primarch-gold);">👁</div><strong>PRIMARCH INTERFACE</strong><div id="primarch-messages" style="height:200px;background:#000;border:1px solid var(--primarch-gold);padding:10px;margin:10px 0;">Connecting...</div><button onclick="window.awakePrimarch()">AWAKEN</button></div>`,
+            init: null
+        },
+        {
+            id: 'phase_control',
+            name: 'Phase Control',
+            icon: '🌀',
+            type: 'window',
+            description: 'Reality phase manipulation system',
+            classification: 'COSMIC TOP SECRET',
+            menuSection: '◉ System Apps',
+            content: `<strong>Reality Phase Manipulation System</strong><div id="phaseControlPanel" style="margin-top:20px;"></div>`,
+            init: function(win) {
+                const panel = win.querySelector('#phaseControlPanel');
+                const updatePanel = () => {
+                    panel.innerHTML = `
+                        <div style="margin-bottom:15px;">Current Phase: <span id="currentPhaseDisplay">${phases[currentPhase]}</span></div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;">
+                            ${phases.map((phase, i) => `<button data-phase="${i}" style="padding:10px;background:var(--quantum-violet);border:1px solid var(--electric-cyan);color:white;cursor:pointer;">${phase}</button>`).join('')}
+                        </div>
+                        <div style="margin-bottom:15px;">Quantum Stability: <div style="width:100%;height:20px;background:#000;border:1px solid var(--electric-cyan);margin-top:5px;"><div style="height:100%;background:linear-gradient(90deg,var(--toxic-green),var(--warning-yellow));width:${100-disturbanceLevel}%;"></div></div></div>
+                        <button id="quantumResetBtn" style="padding:10px;background:var(--blood-red);border:1px solid var(--electric-cyan);color:white;cursor:pointer;">QUANTUM RESET</button>
+                    `;
+                };
+
+                panel.addEventListener('click', e => {
+                    if (e.target.matches('[data-phase]')) {
+                        setPhase(parseInt(e.target.dataset.phase, 10), updatePanel);
+                    } else if (e.target.matches('#quantumResetBtn')) {
+                        quantumReset(updatePanel);
+                    }
+                });
+                updatePanel();
+            }
+        },
+        {
+            id: 'shutdown',
+            name: 'EMERGENCY SHUTDOWN',
+            icon: '⚠',
+            type: 'action',
+            description: 'Complete system termination',
+            classification: 'UNCLASSIFIED',
+            menuSection: '⚡ System Control',
+            action: function() {
+                bootScreen.innerHTML = `<div class="boot-logo">🐙</div><div class="boot-text error" style="font-size:24px;text-align:center;">NEURAL LINK SEVERED</div>`;
+                bootScreen.style.display = 'flex'; bootScreen.style.opacity = '1';
+            }
+        }
+        // <<< PASTE NEW APP OBJECTS HERE >>>
+    ];
+
+    // --- GLOBAL STATE & DOM ELEMENTS ---
+    let startMenuOpen = false, windowZIndex = 100, primarchAwakening = false, currentPhase = 0, disturbanceLevel = 30;
+    const activeWindows = {};
+    const phases = ['NORMAL', 'CORRUPTED', 'BACKROOMS', 'VOID', 'QUANTUM'];
+    const phaseColors = ['#00FF41', '#FF0000', '#e9dcc9', '#FFFFFF', '#8A2BE2'];
+    const getEl = id => document.getElementById(id);
+    const queryEl = sel => document.querySelector(sel);
+    const bootScreen = getEl('bootScreen'), bootText = getEl('bootText'), progressFill = getEl('progressFill'),
+          desktopBg = getEl('desktopBg'), desktopIconsContainer = getEl('desktopIcons'), startMenuContent = getEl('startMenuContent'),
+          windowContainer = getEl('windowContainer'), startButton = queryEl('.start-button'), startMenu = getEl('startMenu'),
+          systemTime = getEl('systemTime'), cpuLoad = getEl('cpuLoad'), memUsage = getEl('memUsage'), neuralSync = getEl('neuralSync'),
+          primarchStatus = getEl('primarchStatus'), phaseShifter = getEl('phaseShifter'), phaseText = getEl('phaseText'),
+          phaseDot = queryEl('.phase-dot'), disturbanceFill = getEl('disturbanceFill'), notification = getEl('notification'),
+          notificationTitle = getEl('notificationTitle'), notificationContent = getEl('notificationContent'), notificationClose = getEl('notificationClose');
+
+    // --- BOOT SEQUENCE (Unchanged) ---
+    function initBoot() {
+        const bootLines = ["Initializing quantum processors...","Loading neural pathways...","Establishing bio-link...","⚠ WARNING: Unauthorized access.","Activating DARPA countermeasures...","Accessing PRIMARCH memory banks...","Neural interface calibration complete."];
+        let lineIndex = 0, progress = 0;
+        const bootInterval = setInterval(() => {
+            if (lineIndex < bootLines.length) { bootText.innerHTML += bootLines[lineIndex++] + '<br>'; }
+            progress += 100 / bootLines.length;
+            progressFill.style.width = Math.min(100, progress) + '%';
+            if (progress >= 100) {
+                clearInterval(bootInterval);
+                setTimeout(() => {
+                    bootScreen.style.opacity = '0';
+                    setTimeout(() => { bootScreen.style.display = 'none'; initDesktop(); }, 1500);
+                }, 800);
+            }
+        }, 400);
+    }
+
+    // --- DYNAMIC DESKTOP & MENU INITIALIZATION ---
+    function initDesktop() {
+        const menuSections = {};
+        APPS.forEach(app => {
+            // Create Desktop Icon
+            const classificationClass = app.classification.includes('TOP SECRET') ? 'primarch-glow' : '';
+            const iconEl = document.createElement('div');
+            iconEl.className = 'desktop-icon';
+            iconEl.dataset.app = app.id;
+            iconEl.innerHTML = `<div class="desktop-icon-image ${classificationClass}">${app.icon}</div><div class="desktop-icon-label">${app.name}</div>`;
+            iconEl.addEventListener('dblclick', () => launchApp(app.id));
+            iconEl.title = `${app.description} [${app.classification}]`;
+            desktopIconsContainer.appendChild(iconEl);
+
+            // Group apps by menu section
+            if (!menuSections[app.menuSection]) { menuSections[app.menuSection] = []; }
+            menuSections[app.menuSection].push(app);
+        });
+
+        // Build Start Menu from grouped sections
+        Object.keys(menuSections).forEach(sectionTitle => {
+            const sectionEl = document.createElement('div');
+            sectionEl.innerHTML = `<div class="menu-section-title">${sectionTitle}</div>`;
+            menuSections[sectionTitle].forEach(app => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'menu-item';
+                itemEl.innerHTML = `<span class="menu-item-icon">${app.icon}</span><span>${app.name}</span>`;
+                itemEl.onclick = () => launchApp(app.id);
+                sectionEl.appendChild(itemEl);
+            });
+            startMenuContent.appendChild(sectionEl);
+        });
+
+        updateTime();
+        setInterval(updateTime, 1000);
+        setInterval(updateSystemInfo, 2000);
+        setInterval(updateDisturbance, 3000);
+    }
+
+    // --- SYSTEM MONITORS & PHASE MANAGEMENT (Largely Unchanged) ---
+    function updateTime() { systemTime.textContent = `${new Date().toTimeString().split(' ')[0]} | DARPA.ACTIVE`; }
+    function updateSystemInfo() {
+        cpuLoad.textContent = `CPU: ${Math.floor(8 + Math.random() * 25)}%`;
+        memUsage.textContent = `MEM: ${(1.2 + Math.random() * 1.5).toFixed(1)}/8GB`;
+        primarchStatus.textContent = primarchAwakening ? `PRIMARCH: ACTIVE` : 'PRIMARCH: DORMANT';
+        primarchStatus.style.color = primarchAwakening ? 'var(--primarch-gold)' : 'var(--crt-blue)';
+    }
+    function updateDisturbance() {
+        disturbanceLevel = Math.max(10, Math.min(90, disturbanceLevel + (Math.random() * 20 - 10)));
+        disturbanceFill.style.width = `${disturbanceLevel}%`;
+        if (disturbanceLevel > 70 && Math.random() > 0.7) { showNotification('Neural Disturbance', 'High levels of quantum interference detected. Reality stability compromised.'); }
+    }
+    function shiftPhase() { setPhase((currentPhase + 1) % phases.length); }
+    function setPhase(phaseIndex, callback) {
+        currentPhase = phaseIndex;
+        desktopBg.className = `desktop-bg phase-${currentPhase}`;
+        phaseText.textContent = `PHASE: ${phases[currentPhase]}`;
+        const color = phaseColors[currentPhase];
+        phaseDot.style.background = color;
+        document.documentElement.style.setProperty('--phase-indicator', color);
+        if (callback && typeof callback === 'function') callback();
+        showNotification('Phase Shift', `Reality phase shifted to ${phases[currentPhase]}.`);
+    }
+    function quantumReset(callback) {
+        disturbanceLevel = 30;
+        setPhase(0, callback);
+        showNotification('Quantum Reset', 'Reality stabilized to baseline parameters.');
+    }
+
+    // --- NOTIFICATION SYSTEM (Unchanged) ---
+    function showNotification(title, content) {
+        notificationTitle.textContent = title;
+        notificationContent.textContent = content;
+        notification.classList.add('show');
+        setTimeout(() => { notification.classList.remove('show'); }, 5000);
+    }
+
+    // --- UNIFIED APP LAUNCHER & WINDOW MANAGER ---
+    function launchApp(appId) {
+        if (startMenuOpen) toggleStartMenu();
+        const app = APPS.find(a => a.id === appId);
+        if (!app) return;
+        switch (app.type) {
+            case 'window': createWindow(app); break;
+            case 'link': window.open(app.url, '_blank'); break;
+            case 'action': if (app.action) app.action(); break;
+        }
+    }
+    function createWindow(app) {
+        if (activeWindows[app.id]) { focusWindow(app.id); return; }
+        const win = document.createElement('div');
+        win.id = `${app.id}Window`;
+        win.className = `window active ${app.classification.includes('TOP SECRET') ? 'primarch-glow' : ''}`;
+        win.style.left = `${100 + Math.random() * 300}px`;
+        win.style.top = `${80 + Math.random() * 150}px`;
+        win.style.zIndex = ++windowZIndex;
+        win.innerHTML = `
+            <div class="window-titlebar">
+                <span>${app.icon} ${app.name} [${app.classification}]</span>
+                <div class="window-controls"><div class="window-control" data-action="close">×</div></div>
+            </div>
+            <div class="window-content">${app.content || ''}</div>`;
+        windowContainer.appendChild(win);
+        activeWindows[app.id] = win;
+        win.querySelector('.window-titlebar').addEventListener('mousedown', onDragStart);
+        win.addEventListener('mousedown', () => focusWindow(app.id));
+        win.querySelector('.window-control[data-action="close"]').onclick = () => closeWindow(app.id);
+        // Execute the app's specific init logic
+        if (app.init) app.init(win);
+    }
+    function closeWindow(appId) { if (activeWindows[appId]) { activeWindows[appId].remove(); delete activeWindows[appId]; } }
+    function focusWindow(appId) { if (activeWindows[appId]) activeWindows[appId].style.zIndex = ++windowZIndex; }
+    function onDragStart(e) {
+        const win = e.target.closest('.window');
+        if (!win) return;
+        focusWindow(win.id.replace('Window', ''));
+        const offsetX = e.clientX - win.offsetLeft, offsetY = e.clientY - win.offsetTop;
+        const onDrag = e => { win.style.left = `${e.clientX - offsetX}px`; win.style.top = `${e.clientY - offsetY}px`; };
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', () => document.removeEventListener('mousemove', onDrag), { once: true });
+    }
+
+    // --- TERMINAL LOGIC (Now uses global functions) ---
+    function addTerminalOutput(text, type = 'info') {
+        const out = document.getElementById('terminalOutput');
+        if (!out) return;
+        const line = document.createElement('div');
+        line.className = type;
+        line.innerHTML = text;
+        out.appendChild(line);
+        out.scrollTop = out.scrollHeight;
+    }
+    function processTerminalCommand(command) {
+        addTerminalOutput(`&gt; ${command}`, 'input');
+        const [cmd, ...args] = command.toLowerCase().split(' ');
+        const app = APPS.find(a => a.id === cmd);
+        if (app) { launchApp(cmd); return; }
+        switch (cmd) {
+            case 'help': addTerminalOutput("Commands: help, status, primarch, phase, clear, [app_name]", 'info'); break;
+            case 'status': addTerminalOutput(`Neural Sync: ${neuralSync.textContent.split(' ')[1]} | Primarch: ${primarchStatus.textContent.split(' ')[1]} | Phase: ${phases[currentPhase]}`, 'success'); break;
+            case 'phase': addTerminalOutput(`Current reality phase: ${phases[currentPhase]}. Use 'shiftPhase()' or the button.`, 'info'); break;
+            case 'primarch':
+                if (primarchAwakening) addTerminalOutput("The Primarch is already awake. It sees you.", 'primarch');
+                else { addTerminalOutput("Initiating Primarch awakening sequence...", 'warning'); awakePrimarch(); }
+                break;
+            case 'clear': document.getElementById('terminalOutput').innerHTML = ''; break;
+            default: addTerminalOutput(`Error: Command '${cmd}' not found.`, 'error');
+        }
+    }
+
+    // --- GLOBAL FUNCTIONS for app/button access ---
+    window.awakePrimarch = () => {
+        primarchAwakening = true;
+        addTerminalOutput("PRIMARCH IS AWAKE.", 'primarch');
+        const msgContainer = document.querySelector('#primarch-messages');
+        if (msgContainer) msgContainer.innerHTML += "<div class='primarch'>I SEE YOU.</div>";
+        showNotification('Primarch Alert', 'The Primarch consciousness has awakened. Neural link established.');
+    };
+
+    // --- EVENT LISTENERS ---
+    startButton.addEventListener('click', e => { e.stopPropagation(); toggleStartMenu(); });
+    phaseShifter.addEventListener('click', e => { e.stopPropagation(); shiftPhase(); });
+    notificationClose.addEventListener('click', () => notification.classList.remove('show'));
+    document.addEventListener('click', () => { if (startMenuOpen) toggleStartMenu(); });
+    function toggleStartMenu() { startMenuOpen = !startMenuOpen; startMenu.classList.toggle('active'); }
+
+    // --- START THE MACHINE ---
+    initBoot();
+});
+</script>
+</body>
+</html>
