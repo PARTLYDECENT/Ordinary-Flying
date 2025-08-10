@@ -1,80 +1,59 @@
-export class SoundManager {
-    constructor() {
-        this.scene = null;
-        this.sounds = {};
+/**
+ * sound.js
+ * * This script waits for the webpage to fully load, then listens for a click 
+ * on the start button. When the button is clicked, it plays the game audio.
+ * This is necessary because modern browsers block sound until the user
+ * interacts with the page.
+ */
+
+// Wait until the entire HTML page is loaded and ready.
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- STEP 1: FIND YOUR HTML ELEMENTS ---
+    
+    // Find the button with the ID "startButton".
+    // IMPORTANT: If your start button in index.html has a different id,
+    // change "startButton" to match it exactly.
+    // Example: If your button is <button id="play-game">, change it to 'play-game'.
+    const startButton = document.getElementById('startButton');
+
+    // Find the audio element with the ID "gameAudio".
+    // IMPORTANT: Make sure your <audio> tag in index.html has this ID.
+    // Example: <audio id="gameAudio" src="your-sound.mp3"></audio>
+    const gameAudio = document.getElementById('gameAudio');
+
+
+    // --- STEP 2: CHECK IF ELEMENTS WERE FOUND ---
+
+    // This is a safety check. If the button or audio can't be found, 
+    // it will print an error to the browser's developer console (F12).
+    if (!startButton) {
+        console.error('ERROR: Could not find the start button. Check the ID in your HTML and JS.');
+        return; // Stop the script if the button is missing.
+    }
+    if (!gameAudio) {
+        console.error('ERROR: Could not find the audio element. Check the ID in your HTML and JS.');
+        return; // Stop the script if the audio element is missing.
     }
 
 
-    loadSound(name, url) {
-        if (!this.scene) {
-            console.error('SoundManager: Scene not set before loading sound!');
-            return;
-        }
-        console.log(`[SoundManager] Loading sound '${name}' from URL:`, url);
-        const sound = new BABYLON.Sound(name, url, this.scene, () => {
-            sound._isReady = true;
-            console.log(`Sound ${name} loaded successfully from:`, url);
-            if (sound._playQueued) {
-                try {
-                    sound.play();
-                    sound._playQueued = false;
-                    console.log(`Sound ${name} started playing (delayed until ready).`);
-                } catch (e) {
-                    console.error(`[SoundManager] Error playing sound '${name}' after load:`, e);
-                }
-            }
-        }, {
-            loop: true,
-            autoplay: false,
-            errorCallback: (e) => {
-                console.error(`[SoundManager] Error loading sound '${name}' from ${url}:`, e);
-            }
+    // --- STEP 3: CREATE THE CLICK EVENT ---
+
+    // This "listens" for a click on your start button.
+    startButton.addEventListener('click', () => {
+        
+        // When the button is clicked, attempt to play the audio.
+        console.log('Start button clicked. Attempting to play audio...');
+
+        // The .play() function returns a "Promise". The .catch() part
+        // is crucial for debugging because it will tell you if something
+        // went wrong (e.g., file not found, browser blocked it).
+        gameAudio.play().catch(error => {
+            console.error('AUDIO PLAYBACK ERROR:', error);
         });
-        sound._playQueued = false;
-        sound._isReady = false;
-        this.sounds[name] = sound;
-    }
 
+        // Optional: If you want the button to disappear after being clicked.
+        // startButton.style.display = 'none';
+    });
 
-    playSound(name) {
-        console.log(`[SoundManager] Attempting to play sound: ${name}`);
-        const sound = this.sounds[name];
-        if (!sound) {
-            console.warn(`[SoundManager] Sound '${name}' not loaded yet.`);
-            return;
-        }
-        if (!sound._isReady) {
-            console.warn(`[SoundManager] Sound '${name}' is not ready to play. Queuing play request.`);
-            sound._playQueued = true;
-            return;
-        }
-        if (!sound.isPlaying) {
-            try {
-                sound.play();
-                console.log(`[SoundManager] Sound '${name}' started playing.`);
-            } catch (e) {
-                console.error(`[SoundManager] Failed to play sound '${name}':`, e);
-            }
-        }
-    }
-
-    stopSound(name) {
-        if (this.sounds[name] && this.sounds[name].isPlaying) {
-            this.sounds[name].stop();
-            console.log(`Sound ${name} stopped.`);
-        }
-    }
-
-    init() {
-        // Unlock audio context on any user interaction
-        const unlock = () => {
-            if (BABYLON.Engine.audioEngine && !BABYLON.Engine.audioEngine.audioContext.isRunning) {
-                BABYLON.Engine.audioEngine.unlock();
-                console.log("Audio context unlocked.");
-            }
-        };
-        ["click", "keydown", "pointerdown", "touchstart"].forEach(evt => {
-            window.addEventListener(evt, unlock, { once: true });
-        });
-    }
-}
+});
