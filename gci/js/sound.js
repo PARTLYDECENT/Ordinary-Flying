@@ -1,30 +1,53 @@
 // sound.js
 
-// Create an object that we can export.
-const SoundManager = {
-    
-    // An 'init' function to set everything up. 
-    // This will be called from your game.js file.
-    init: function() {
-        console.log("SoundManager initializing...");
+import * as BABYLON from 'https://cdn.babylonjs.com/babylon.js';
 
-        const startButton = document.getElementById('startButton');
-        const gameAudio = document.getElementById('gameAudio');
+/**
+ * Manages all game sounds.
+ * This class now correctly handles being created with 'new SoundManager()'.
+ */
+export class SoundManager {
+    constructor(scene) {
+        // Store the scene reference
+        this.scene = scene;
 
-        if (!startButton || !gameAudio) {
-            console.error("SoundManager Error: Missing startButton or gameAudio element in HTML.");
-            return;
-        }
+        // --- Sound Definitions ---
+        // Load the main music file. The 'loop' and 'autoplay' settings are important.
+        // Autoplay will be blocked by the browser, but we handle that with the start button.
+        this.music = new BABYLON.Sound(
+            "Music", 
+            "gci/static/sounds/music.mp3", // Make sure this path is correct
+            this.scene, 
+            null, // This callback is called when the sound is ready to play
+            { 
+                loop: true, 
+                autoplay: true, 
+                volume: 0.1 
+            }
+        );
 
-        startButton.addEventListener('click', () => {
-            console.log("Start button clicked, playing audio.");
-            gameAudio.play().catch(error => {
-                console.error('Audio playback failed:', error);
-            });
+        // Load a sound for shooting
+        this.laserSound = new BABYLON.Sound(
+            "laser",
+            "gci/static/sounds/laser.wav", // Make sure this path is correct
+            this.scene
+        );
+
+        // The browser requires a user interaction to start any audio.
+        // We ensure that once the scene is ready to play audio, it will.
+        // This is the modern replacement for a start button listener for Babylon.js sounds.
+        BABYLON.Engine.audioEngine.onAudioUnlockedObservable.addOnce(() => {
+            console.log("Audio engine unlocked by user interaction.");
+            this.music.play();
         });
-    }
-};
 
-// --- THIS IS THE KEY ---
-// This line makes the SoundManager available to be imported by other files.
-export { SoundManager };
+        console.log("SoundManager constructed and sounds are loading.");
+    }
+
+    // A function to play the laser sound when called from your game logic.
+    playLaserSound() {
+        if (this.laserSound && this.laserSound.isReady()) {
+            this.laserSound.play();
+        }
+    }
+}
