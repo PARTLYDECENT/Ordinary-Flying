@@ -29,6 +29,11 @@ export class Player {
         this.inputMap = {};
         window.addEventListener('keydown', (e) => this.inputMap[e.key.toLowerCase()] = true);
         window.addEventListener('keyup', (e) => this.inputMap[e.key.toLowerCase()] = false);
+
+        // Speed properties
+        this.baseSpeed = 0.8;
+        this.boostSpeed = 5.0;
+        this.currentSpeed = this.baseSpeed; // Start with the base speed
     }
 
     createThrusterEffects() {
@@ -179,20 +184,27 @@ export class Player {
         const deltaTime = this.scene.getEngine().getDeltaTime();
         this.bulletCooldown -= deltaTime;
 
-        const moveSpeed = 0.8;
         const rotationSpeed = 0.05;
+
+        // Speed control logic
+        if (this.inputMap['1']) {
+            this.currentSpeed = this.baseSpeed; // Set to normal speed
+        }
+        if (this.inputMap['2']) {
+            this.currentSpeed = this.boostSpeed; // Set to boost speed
+        }
 
         let isThrusting = false;
         let thrusterIntensityTarget = 0;
 
         // Thrust
         if (this.inputMap['w']) {
-            this.mesh.translate(BABYLON.Axis.Z, moveSpeed, BABYLON.Space.LOCAL);
+            this.mesh.translate(BABYLON.Axis.Z, this.currentSpeed, BABYLON.Space.LOCAL);
             isThrusting = true;
             thrusterIntensityTarget = 1.0;
         }
         if (this.inputMap['s']) {
-            this.mesh.translate(BABYLON.Axis.Z, -moveSpeed, BABYLON.Space.LOCAL);
+            this.mesh.translate(BABYLON.Axis.Z, -this.currentSpeed, BABYLON.Space.LOCAL);
             isThrusting = true;
             thrusterIntensityTarget = 0.6;
         }
