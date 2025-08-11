@@ -4,77 +4,83 @@ export class SoundManager {
         this.sounds = {};
     }
 
+    // --- INITIALIZE THE MANAGER ---
+    // Call this once with your Babylon.js scene.
+    init(scene) {
+        this.scene = scene;
 
-    loadSound(name, url) {
-        if (!this.scene) {
-            console.error('SoundManager: Scene not set before loading sound!');
-            return;
-        }
-        console.log(`[SoundManager] Loading sound '${name}' from URL:`, url);
-        const sound = new BABYLON.Sound(name, url, this.scene, () => {
-            sound._isReady = true;
-            console.log(`Sound ${name} loaded successfully from:`, url);
-            if (sound._playQueued) {
-                try {
-                    sound.play();
-                    sound._playQueued = false;
-                    console.log(`Sound ${name} started playing (delayed until ready).`);
-                } catch (e) {
-                    console.error(`[SoundManager] Error playing sound '${name}' after load:`, e);
-                }
-            }
-        }, {
-            loop: true,
-            autoplay: false,
-            errorCallback: (e) => {
-                console.error(`[SoundManager] Error loading sound '${name}' from ${url}:`, e);
-            }
-        });
-        sound._playQueued = false;
-        sound._isReady = false;
-        this.sounds[name] = sound;
-    }
-
-
-    playSound(name) {
-        console.log(`[SoundManager] Attempting to play sound: ${name}`);
-        const sound = this.sounds[name];
-        if (!sound) {
-            console.warn(`[SoundManager] Sound '${name}' not loaded yet.`);
-            return;
-        }
-        if (!sound._isReady) {
-            console.warn(`[SoundManager] Sound '${name}' is not ready to play. Queuing play request.`);
-            sound._playQueued = true;
-            return;
-        }
-        if (!sound.isPlaying) {
-            try {
-                sound.play();
-                console.log(`[SoundManager] Sound '${name}' started playing.`);
-            } catch (e) {
-                console.error(`[SoundManager] Failed to play sound '${name}':`, e);
-            }
-        }
-    }
-
-    stopSound(name) {
-        if (this.sounds[name] && this.sounds[name].isPlaying) {
-            this.sounds[name].stop();
-            console.log(`Sound ${name} stopped.`);
-        }
-    }
-
-    init() {
-        // Unlock audio context on any user interaction
+        // Unlock audio on the first user interaction
         const unlock = () => {
-            if (BABYLON.Engine.audioEngine && !BABYLON.Engine.audioEngine.audioContext.isRunning) {
+            if (BABYLON.Engine.audioEngine && !BABYLON.Engine.audioEngine.isUnlocked) {
                 BABYLON.Engine.audioEngine.unlock();
                 console.log("Audio context unlocked.");
             }
+            // Remove listeners after the first interaction
+            ["click", "keydown", "pointerdown", "touchstart"].forEach(evt => {
+                window.removeEventListener(evt, unlock);
+            });
         };
+
         ["click", "keydown", "pointerdown", "touchstart"].forEach(evt => {
             window.addEventListener(evt, unlock, { once: true });
         });
+    }
+
+    // --- LOAD A SOUND ---
+    // This now returns a Promise that resolves when the sound is actually ready.
+    loadSound(name, url) {
+        return new Promise((resolve, reject) => {
+            // Check if the scene has been set
+            if (!this.scene) {
+                const errorMsg = "SoundManager Error: You must call .init(scene) before loading sounds.";
+                console.error(errorMsg);
+                return reject(errorMsg);
+            }
+
+            // Create the sound object
+            const sound = new BABYLON.Sound(
+                name,
+                url,
+                this.scene,
+                // --- This function runs ONLY when the sound is successfully loaded ---
+                () => {
+                    this.sounds[name] = sound; // Add the ready sound to our list
+                    console.log(`[SoundManager] SUCCESS: Sound '${name}' is loaded and ready.`);
+                    resolve(sound); // The Promise is complete
+                },
+                // --- Options for the sound ---
+                {
+                    loop: false,   // Set to true if you want it to loop
+                    autoplay: false,
+                    // This function runs ONLY if the file can't be found or is corrupt
+                    errorCallback: () => {
+                        const errorMsg = `[SoundManager] FATAL ERROR: Could not load sound '${name}' from path: ${url}. Check the path and file.`;
+                        console.error(errorMsg);
+                        reject(errorMsg); // The Promise has failed
+                    }
+                }
+            );
+        });
+    }
+
+    // --- PLAY A SOUND ---
+    // Plays a sound that has already been loaded.
+    playSound(name) {
+        const sound = this.sounds[name];
+        if (sound) {
+            console.log(`[SoundManager] Playing '${name}'.`);
+            sound.play();
+        } else {
+            console.error(`[SoundManager] Cannot play sound '${name}'. It was never loaded.`);
+        }
+    }
+
+    // --- STOP A SOUND ---
+    stopSound(name) {
+        const sound = this.sounds[name];
+        if (sound && sound.isPlaying) {
+            sound.stop();
+            console.log(`[SoundManager] Stopped '${name}'.`);
+        }
     }
 }
