@@ -31,8 +31,8 @@ export class Game {
         // (lighting, starfield, etc.)
         const light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), this.scene);
         
-        // Load sounds - FIXED TO USE SAME PATH AS SHIPS
-        this.soundManager.loadSound("engineSound", "./static/sound1.mp3");
+        // Load sounds
+        this.soundManager.loadSound("engineSound", "/gci/static/sound1.mp3");
 
         // Load the map and player ship
         const shipResult = await BABYLON.SceneLoader.ImportMeshAsync("", "./static/", "ship1.glb", this.scene);
@@ -57,12 +57,14 @@ export class Game {
         camera.lockedTarget = playerShip; // The camera will follow this object
 
         // ...spawn enemies, etc.
+
         return this.scene;
     }
 
     // The main loop
     async run() {
         await this.createScene();
+
         this.stateManager.setState(GameState.PLAYING); // Set initial state
         this.soundManager.init();
 
