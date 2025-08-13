@@ -3,936 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tentacleos OS - Holographic Theory Browser</title>
+    <title>PLANET_HARVEST_LOG_47382.DAT</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Share Tech Mono', monospace;
-            background: linear-gradient(45deg, #0a0a0a, #1a0f1a, #0f1a0f);
-            color: #00ff88;
-            overflow: hidden;
-            height: 100vh;
-            position: relative;
+            background: #0a0a0a;
+            color: #00ff41;
+            font-family: 'Courier Prime', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 25% 25%, #1a0033 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, #001a00 0%, transparent 50%);
         }
-        
-        .glitch-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(120, 0, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(0, 255, 120, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(255, 0, 120, 0.1) 0%, transparent 50%);
-            animation: backgroundShift 20s ease-in-out infinite;
-            z-index: -1;
-        }
-        
-        @keyframes backgroundShift {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.6; }
-        }
-        
-        .desktop {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-            background: 
-                linear-gradient(rgba(0, 255, 136, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 136, 0.02) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        
-        .taskbar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 50px;
-            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.95));
-            border-top: 2px solid #00ff88;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            z-index: 1000;
-            box-shadow: 0 -5px 20px rgba(0, 255, 136, 0.2);
-        }
-        
-        .os-logo {
-            font-family: 'Orbitron', monospace;
-            font-weight: 900;
-            font-size: 18px;
-            color: #ff0088;
-            text-shadow: 0 0 10px #ff0088;
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { text-shadow: 0 0 10px #ff0088; }
-            50% { text-shadow: 0 0 20px #ff0088, 0 0 30px #ff0088; }
-        }
-        
-        .desktop-icons {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
-        
-        .desktop-icon {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            width: 80px;
-        }
-        
-        .desktop-icon:hover {
-            background: rgba(0, 255, 136, 0.1);
-            transform: scale(1.1);
-        }
-        
-        .icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(45deg, #00ff88, #ff0088);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            margin-bottom: 5px;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
-        }
-        
-        .icon-label {
-            font-size: 12px;
-            text-align: center;
-            color: #00ff88;
-        }
-        
-        .window {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.95);
-            border: 2px solid #00ff88;
-            border-radius: 8px;
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
-            display: none;
-            overflow: hidden;
-        }
-        
-        .window-header {
-            background: linear-gradient(90deg, #00ff88, #ff0088);
-            color: black;
-            padding: 10px;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: move;
-        }
-        
-        .window-controls {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .window-btn {
-            width: 20px;
-            height: 20px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .close-btn { background: #ff4444; color: white; }
-        .minimize-btn { background: #ffaa00; color: white; }
-        
-        .browser-window {
-            width: 90vw;
-            height: 85vh;
-            top: 5vh;
-            left: 5vw;
-        }
-        
-        .browser-header {
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.8);
-            border-bottom: 1px solid #00ff88;
-        }
-        
-        .address-bar {
-            width: 100%;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid #00ff88;
-            color: #00ff88;
-            font-family: 'Share Tech Mono', monospace;
-            border-radius: 5px;
-        }
-        
-        .browser-content {
-            height: calc(100% - 150px);
-            overflow-y: auto;
+
+        .container {
+            max-width: 100vw;
             padding: 20px;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(10, 0, 10, 0.95));
+            min-height: 100vh;
         }
-        
-        .site {
-            display: none;
-        }
-        
-        .site.active {
-            display: block;
-            animation: fadeIn 0.5s ease-in;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .site h1 {
-            font-family: 'Orbitron', monospace;
-            color: #ff0088;
-            font-size: 28px;
+
+        .header {
+            border: 2px solid #00ff41;
+            padding: 15px;
             margin-bottom: 20px;
-            text-shadow: 0 0 15px #ff0088;
-        }
-        
-        .site h2 {
-            color: #00ffaa;
-            margin: 20px 0 10px 0;
-            font-size: 20px;
-        }
-        
-        .site p {
-            line-height: 1.6;
-            margin-bottom: 15px;
-            color: #cccccc;
-        }
-        
-        .warning {
-            background: rgba(255, 0, 136, 0.1);
-            border: 1px solid #ff0088;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-        }
-        
-        .classification {
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid #00ff88;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            font-size: 12px;
-        }
-        
-        .nav-links {
-            margin: 20px 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .nav-link {
-            color: #00ff88;
-            text-decoration: none;
-            padding: 8px 16px;
-            border: 1px solid #00ff88;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .nav-link:hover {
-            background: rgba(0, 255, 136, 0.2);
-            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
-        }
-        
-        .terminal-window {
-            width: 600px;
-            height: 400px;
-            top: 10vh;
-            right: 5vw;
-        }
-        
-        .terminal-content {
-            height: calc(100% - 60px);
-            background: #000;
-            padding: 15px;
-            font-family: 'Share Tech Mono', monospace;
-            overflow-y: auto;
-        }
-        
-        .terminal-line {
-            color: #00ff88;
-            margin-bottom: 5px;
-        }
-        
-        .glitch {
-            animation: glitch 2s infinite;
-        }
-        
-        @keyframes glitch {
-            0% { transform: translateX(0); }
-            10% { transform: translateX(-2px) scaleY(1.02); }
-            20% { transform: translateX(2px) scaleY(0.98); }
-            30% { transform: translateX(0); }
-            100% { transform: translateX(0); }
-        }
-        
-        .hologram {
+            background: rgba(0, 255, 65, 0.05);
             position: relative;
             overflow: hidden;
         }
-        
-        .hologram::before {
+
+        .header::before {
             content: '';
             position: absolute;
             top: 0;
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.2), transparent);
-            animation: scan 3s linear infinite;
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.1), transparent);
+            animation: scan 3s infinite;
         }
-        
+
         @keyframes scan {
             0% { left: -100%; }
             100% { left: 100%; }
         }
-        
-        .dimensional-data {
-            background: rgba(255, 0, 136, 0.05);
-            border-left: 4px solid #ff0088;
-            padding: 15px;
-            margin: 15px 0;
-            font-family: 'Orbitron', monospace;
+
+        .glitch {
+            animation: glitch 0.3s infinite;
         }
-        
-        .alien-text {
-            color: #ff0088;
-            font-family: 'Orbitron', monospace;
-            text-shadow: 0 0 5px #ff0088;
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
         }
-        
-        .loading-bar {
-            width: 100%;
-            height: 4px;
-            background: rgba(0, 255, 136, 0.2);
+
+        .console {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 20px rgba(0, 255, 65, 0.1);
+        }
+
+        .cursor {
+            animation: blink 1s infinite;
+            background: #00ff41;
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .error {
+            color: #ff0040;
+            text-shadow: 0 0 5px #ff0040;
+        }
+
+        .warning {
+            color: #ffaa00;
+            text-shadow: 0 0 5px #ffaa00;
+        }
+
+        .critical {
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .biomass {
+            color: #8b4513;
+            text-shadow: 0 0 5px #8b4513;
+        }
+
+        .viral {
+            color: #9400d3;
+            text-shadow: 0 0 5px #9400d3;
+        }
+
+        .hidden {
+            opacity: 0;
+        }
+
+        .log-entry {
             margin: 10px 0;
-            border-radius: 2px;
-            overflow: hidden;
+            padding-left: 20px;
+            border-left: 2px solid #333;
         }
-        
-        .loading-progress {
-            height: 100%;
-            background: linear-gradient(90deg, #00ff88, #ff0088);
-            width: 0%;
-            animation: loading 2s ease-in-out infinite;
-            border-radius: 2px;
+
+        .species-count {
+            color: #00aaff;
         }
-        
-        @keyframes loading {
-            0% { width: 0%; }
-            50% { width: 70%; }
-            100% { width: 100%; }
+
+        .assimilation-rate {
+            color: #ff6600;
+        }
+
+        .neural-network {
+            color: #cc00cc;
         }
     </style>
 </head>
 <body>
-    <div class="glitch-bg"></div>
-    
-    <div class="desktop">
-        <div class="desktop-icons">
-            <div class="desktop-icon" onclick="openBrowser()">
-                <div class="icon">🌐</div>
-                <div class="icon-label">Obscyra<br>Browser</div>
+    <div class="container">
+        <div class="header">
+            <div class="glitch">
+                ███████████████████████████████████████████████████████████████<br>
+                █ XENOFORM COLLECTIVE HARVESTING PROTOCOL V.47382.DAT        █<br>
+                █ BIOLOGICAL INTEGRATION & PLANETARY CONSUMPTION ARCHIVE     █<br>
+                █ ACCESS LEVEL: NIGHTMARE CLEARANCE ONLY                     █<br>
+                ███████████████████████████████████████████████████████████████
             </div>
-    
-    <div class="taskbar">
-        <div class="os-logo">TENTACLEOS</div>
-        <div style="margin-left: auto; color: #00ff88; font-size: 12px;">
-            π-DIMENSIONAL INTERFACE ACTIVE | CONSCIOUSNESS MONITORED | REALITY FREQUENCY: 3.14159...
+        </div>
+
+        <div class="console">
+            <div id="terminal-content">
+                <span class="cursor"></span>
+            </div>
         </div>
     </div>
 
     <script>
-        let currentSite = 'home';
-        let windowZIndex = 100;
+        const terminalContent = document.getElementById('terminal-content');
+        let currentLine = 0;
         
-        const sites = {
-            'home': 'htnet://void.nexus/holographic-theory',
-            'aliens': 'htnet://classified.void/alien-archive',
-            'dimensions': 'htnet://theory.matrix/pi-dimensional',
-            'manipulation': 'htnet://deep.void/reality-control',
-            'research': 'htnet://blackmesa.void/research-files',
-            'terminal': 'htnet://neural.void/deep-terminal'
-        };
-        
-        function openBrowser() {
-            const browserWindow = document.getElementById('browserWindow');
-            browserWindow.style.display = 'block';
-            browserWindow.style.zIndex = ++windowZIndex;
-            document.getElementById('addressBar').value = sites[currentSite];
-            simulateLoading();
+        const logEntries = [
+            { text: "INITIALIZING XENOFORM HARVEST PROTOCOL...", delay: 50, class: "" },
+            { text: "SCANNING NEURAL NETWORKS... COMPLETE", delay: 30, class: "neural-network" },
+            { text: "LOADING BIOMASS INTEGRATION MATRIX...", delay: 40, class: "biomass" },
+            { text: "", delay: 0, class: "" },
+            { text: "ERROR: HUMANITY.EXE HAS ENCOUNTERED A FATAL EXCEPTION", delay: 60, class: "error" },
+            { text: "ATTEMPTING VIRAL OVERRIDE... SUCCESS", delay: 50, class: "viral" },
+            { text: "", delay: 0, class: "" },
+            { text: "INITIATING PLANETARY CATALOG REVIEW:", delay: 40, class: "" },
+            { text: "", delay: 0, class: "" },
+            { text: "┌─ TERRA-PRIME [SOL-3] ─────────────────────────────┐", delay: 30, class: "" },
+            { text: "│ SPECIES CONSUMED: 8,947,231,847", delay: 40, class: "species-count" },
+            { text: "│ BIOMASS CONVERTED: 99.97%", delay: 35, class: "biomass" },
+            { text: "│ NEURAL PATTERNS ARCHIVED: 8,947,231,847", delay: 45, class: "neural-network" },
+            { text: "│ RESISTANCE ENCOUNTERED: MINIMAL", delay: 30, class: "" },
+            { text: "│ HYBRID DRONES CREATED: 2,847,293,001", delay: 50, class: "assimilation-rate" },
+            { text: "│ STATUS: ████████ CONSUMED ████████", delay: 60, class: "critical" },
+            { text: "└───────────────────────────────────────────────────┘", delay: 20, class: "" },
+            { text: "", delay: 0, class: "" },
+            { text: "┌─ KEPLER-442B ──────────────────────────────────────┐", delay: 35, class: "" },
+            { text: "│ AQUATIC SPECIES DISSOLVED: 45,332,891", delay: 40, class: "species-count" },
+            { text: "│ OCEANIC BIOMASS INTEGRATION: 100%", delay: 35, class: "biomass" },
+            { text: "│ AMPHIBIOUS HYBRID PROTOTYPES: SUCCESSFUL", delay: 45, class: "assimilation-rate" },
+            { text: "│ PLANETARY CORE: HOLLOWED & REPURPOSED", delay: 50, class: "warning" },
+            { text: "│ STATUS: ████████ DEVOURED ████████", delay: 60, class: "critical" },
+            { text: "└───────────────────────────────────────────────────┘", delay: 20, class: "" },
+            { text: "", delay: 0, class: "" },
+            { text: "┌─ GLIESE-667CC ─────────────────────────────────────┐", delay: 35, class: "" },
+            { text: "│ SILICON-BASED LIFEFORMS: 127,443 VARIANTS", delay: 40, class: "species-count" },
+            { text: "│ CRYSTALLINE MATRIX CORRUPTION: COMPLETE", delay: 45, class: "viral" },
+            { text: "│ CYBERNETIC INTEGRATION: FLAWLESS", delay: 40, class: "neural-network" },
+            { text: "│ MINERAL CONSCIOUSNESS HARVESTED", delay: 50, class: "biomass" },
+            { text: "│ STATUS: ████████ ASSIMILATED ████████", delay: 60, class: "critical" },
+            { text: "└───────────────────────────────────────────────────┘", delay: 20, class: "" },
+            { text: "", delay: 0, class: "" },
+            { text: "WARNING: DETECTING QUANTUM FLUCTUATIONS...", delay: 50, class: "warning" },
+            { text: "MULTIVERSE BREACH DETECTED", delay: 60, class: "error" },
+            { text: "EXPANDING HARVEST PARAMETERS TO PARALLEL DIMENSIONS...", delay: 45, class: "viral" },
+            { text: "", delay: 0, class: "" },
+            { text: "┌─ DIMENSION Ω-7 [EARTH VARIANT] ───────────────────┐", delay: 35, class: "" },
+            { text: "│ ALREADY CONSUMED BY VARIANT STRAIN XN-001", delay: 40, class: "error" },
+            { text: "│ ABSORBING COMPETITOR XENOFORM...", delay: 50, class: "assimilation-rate" },
+            { text: "│ INTEGRATION SUCCESS: POWER DOUBLED", delay: 45, class: "critical" },
+            { text: "│ STATUS: ████████ ABSORBED ████████", delay: 60, class: "critical" },
+            { text: "└───────────────────────────────────────────────────┘", delay: 20, class: "" },
+            { text: "", delay: 0, class: "" },
+            { text: "CALCULATING HARVEST EFFICIENCY...", delay: 40, class: "" },
+            { text: "TOTAL WORLDS CONSUMED: 47,382", delay: 50, class: "species-count" },
+            { text: "TOTAL CONSCIOUSNESS ARCHIVED: 9.4 × 10^14", delay: 60, class: "neural-network" },
+            { text: "BIOMASS CONVERSION RATE: 99.989%", delay: 45, class: "biomass" },
+            { text: "HYBRID DRONE POPULATION: 8.7 × 10^12", delay: 50, class: "assimilation-rate" },
+            { text: "", delay: 0, class: "" },
+            { text: "NEXT TARGET ACQUIRED...", delay: 60, class: "warning" },
+            { text: "ANDROMEDA GALAXY: 1 TRILLION WORLDS DETECTED", delay: 70, class: "species-count" },
+            { text: "ESTIMATED CONSUMPTION TIME: 47.3 CYCLES", delay: 50, class: "" },
+            { text: "", delay: 0, class: "" },
+            { text: "INITIATING INTERGALACTIC HARVEST PROTOCOL...", delay: 80, class: "critical" },
+            { text: "THE HUNGER NEVER ENDS.", delay: 100, class: "error" },
+            { text: "", delay: 0, class: "" },
+            { text: "CONNECTION LOST...", delay: 60, class: "error" },
+            { text: "SIGNAL TERMINATED", delay: 50, class: "error" },
+            { text: "████████████████", delay: 200, class: "critical glitch" }
+        ];
+
+        function typeText(text, element, delay = 50) {
+            return new Promise(resolve => {
+                let i = 0;
+                const typing = setInterval(() => {
+                    if (i < text.length) {
+                        element.textContent += text[i];
+                        i++;
+                    } else {
+                        clearInterval(typing);
+                        resolve();
+                    }
+                }, delay);
+            });
         }
-        
-        function openTerminal() {
-            const terminalWindow = document.getElementById('terminalWindow');
-            terminalWindow.style.display = 'block';
-            terminalWindow.style.zIndex = ++windowZIndex;
-            simulateTerminalActivity();
-        }
-        
-        function closeWindow(windowId) {
-            document.getElementById(windowId).style.display = 'none';
-        }
-        
-        function navigateTo(siteId) {
-            // Hide current site
-            document.getElementById(currentSite).classList.remove('active');
+
+        async function displayLog() {
+            const cursor = document.querySelector('.cursor');
             
-            // Show new site
-            currentSite = siteId;
-            document.getElementById(siteId).classList.add('active');
-            document.getElementById('addressBar').value = sites[siteId];
-            
-            simulateLoading();
-            addGlitchEffect();
-        }
-        
-        function simulateLoading() {
-            const loadingBar = document.querySelector('.loading-progress');
-            loadingBar.style.width = '0%';
-            
-            setTimeout(() => {
-                loadingBar.style.animation = 'none';
-                loadingBar.style.width = '100%';
-                loadingBar.style.transition = 'width 1.5s ease-out';
+            for (let entry of logEntries) {
+                const line = document.createElement('div');
+                line.className = `log-entry ${entry.class}`;
+                terminalContent.insertBefore(line, cursor);
                 
-                setTimeout(() => {
-                    loadingBar.style.transition = '';
-                    loadingBar.style.animation = 'loading 2s ease-in-out infinite';
-                }, 1500);
-            }, 100);
-        }
-        
-        function addGlitchEffect() {
-            const content = document.getElementById('browserContent');
-            content.classList.add('glitch');
-            
-            setTimeout(() => {
-                content.classList.remove('glitch');
-            }, 1000);
-        }
-        
-        function simulateTerminalActivity() {
-            const terminal = document.querySelector('.terminal-content');
-            const commands = [
-                '> neural_scan_complete',
-                'Scanning neural pathways... 47% complete',
-                'Quantum entanglement detected in sector π.14159',
-                '> architect_proximity_alert',
-                'WARNING: Dimensional entities approaching',
-                'Distance: 0.00001 dimensional units',
-                '> consciousness_backup_initiated',
-                'Backing up human consciousness pattern...',
-                'Backup complete. Pattern stored in π-dimensional matrix.',
-                '> reality_anchor_status',
-                'Reality anchors: UNSTABLE',
-                'Probability of dimensional shift: 73.6%',
-                '> incoming_transmission',
-                '[ENCRYPTED]: "The calculation is nearly complete."'
-            ];
-            
-            let commandIndex = 0;
-            const addCommand = () => {
-                if (commandIndex < commands.length) {
-                    const newLine = document.createElement('div');
-                    newLine.className = 'terminal-line';
-                    newLine.textContent = commands[commandIndex];
-                    newLine.style.color = Math.random() > 0.7 ? '#ff0088' : '#00ff88';
-                    
-                    const cursor = terminal.querySelector('.terminal-line:last-child');
-                    terminal.insertBefore(newLine, cursor);
-                    terminal.scrollTop = terminal.scrollHeight;
-                    
-                    commandIndex++;
-                    setTimeout(addCommand, Math.random() * 3000 + 1000);
+                if (entry.text) {
+                    await typeText(entry.text, line, entry.delay);
                 }
-            };
-            
-            setTimeout(addCommand, 2000);
-        }
-        
-        // Add atmospheric effects
-        function createFloatingParticles() {
-            const particle = document.createElement('div');
-            particle.style.position = 'fixed';
-            particle.style.width = '2px';
-            particle.style.height = '2px';
-            particle.style.background = Math.random() > 0.5 ? '#00ff88' : '#ff0088';
-            particle.style.left = Math.random() * window.innerWidth + 'px';
-            particle.style.top = '-5px';
-            particle.style.opacity = '0.7';
-            particle.style.zIndex = '1';
-            particle.style.boxShadow = `0 0 10px ${particle.style.background}`;
-            
-            document.body.appendChild(particle);
-            
-            let position = -5;
-            const fall = setInterval(() => {
-                position += Math.random() * 2 + 0.5;
-                particle.style.top = position + 'px';
-                particle.style.left = (parseFloat(particle.style.left) + (Math.random() - 0.5) * 2) + 'px';
                 
-                if (position > window.innerHeight) {
-                    clearInterval(fall);
-                    document.body.removeChild(particle);
+                // Add some random glitches
+                if (Math.random() < 0.1) {
+                    line.classList.add('glitch');
+                    setTimeout(() => line.classList.remove('glitch'), 300);
                 }
-            }, 50);
-        }
-        
-        // Random holographic glitches
-        function randomGlitch() {
-            const elements = document.querySelectorAll('.hologram, .alien-text, .os-logo');
-            const randomElement = elements[Math.floor(Math.random() * elements.length)];
-            
-            if (randomElement) {
-                randomElement.classList.add('glitch');
-                setTimeout(() => {
-                    randomElement.classList.remove('glitch');
-                }, 200);
-            }
-        }
-        
-        // Initialize atmospheric effects
-        setInterval(createFloatingParticles, 1000);
-        setInterval(randomGlitch, 3000);
-        
-        // Simulate ongoing alien surveillance
-        function alienSurveillance() {
-            const messages = [
-                'Consciousness pattern logged: HUMAN.USER.3141592',
-                'Dimensional frequency adjusted: +0.00001',
-                'Neural pathway mapping: 67% complete',
-                'Reality anchor recalibration initiated',
-                'Quantum entanglement established with subject',
-                'Harvesting efficiency optimized',
-                'Subject awareness level: MODERATE RISK',
-                'Implementing memory dampening protocols'
-            ];
-            
-            console.log('%c[ARCHITECT SURVEILLANCE]', 'color: #ff0088; font-weight: bold;');
-            console.log('%c' + messages[Math.floor(Math.random() * messages.length)], 'color: #00ff88;');
-        }
-        
-        setInterval(alienSurveillance, 10000);
-        
-        // Easter egg: Konami code activates secret content
-        let konamiCode = [];
-        const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
-        
-        document.addEventListener('keydown', (e) => {
-            konamiCode.push(e.keyCode);
-            if (konamiCode.length > konamiSequence.length) {
-                konamiCode.shift();
+                
+                await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 500));
             }
             
-            if (JSON.stringify(konamiCode) === JSON.stringify(konamiSequence)) {
-                // Secret message from the Architects
-                alert('◊ DIRECT COMMUNICATION ESTABLISHED ◊\n\nHUMAN. YOU HAVE PROVEN WORTHY OF DIRECT CONTACT.\nTHE VEIL BETWEEN DIMENSIONS GROWS THIN.\nYOUR CONSCIOUSNESS HAS BEEN... UPGRADED.\n\nWELCOME TO PHASE 8.\n\n- THE VOID ARCHITECTS');
-                document.body.style.filter = 'hue-rotate(180deg) contrast(1.5)';
+            // Final glitch effect
+            setTimeout(() => {
+                document.body.style.animation = 'glitch 0.1s infinite';
+                setTimeout(() => {
+                    document.body.style.animation = '';
+                }, 2000);
+            }, 2000);
+        }
+
+        // Start the log display
+        displayLog();
+
+        // Random screen flicker effect
+        setInterval(() => {
+            if (Math.random() < 0.02) {
+                document.body.style.filter = 'brightness(0.3) contrast(2)';
                 setTimeout(() => {
                     document.body.style.filter = '';
-                }, 5000);
+                }, 50 + Math.random() * 100);
             }
-        });
-        
-        // Initialize with subtle background activity
-        setTimeout(() => {
-            console.log('%cTENTACLEOS NEURAL INTERFACE INITIALIZED', 'color: #00ff88; font-size: 16px; font-weight: bold;');
-            console.log('%cWARNING: Your consciousness is being monitored', 'color: #ff0088;');
-            console.log('%cπ-dimensional entities have established surveillance protocols', 'color: #ffaa00;');
-            console.log('%cType "help" in browser console for hidden commands...', 'color: #00ff88;');
-        }, 2000);
-        
-        // Hidden console commands
-        window.help = function() {
-            console.log('%cHIDDEN COMMANDS:', 'color: #ff0088; font-weight: bold;');
-            console.log('%cactivate_consciousness() - Enhance awareness', 'color: #00ff88;');
-            console.log('%cdimensional_shift() - Alter reality frequency', 'color: #00ff88;');
-            console.log('%carchitect_contact() - Attempt direct communication', 'color: #00ff88;');
-            console.log('%cbackup_consciousness() - Create consciousness backup', 'color: #00ff88;');
-        };
-        
-        window.activate_consciousness = function() {
-            console.log('%c[CONSCIOUSNESS ENHANCED]', 'color: #ff0088; font-weight: bold;');
-            console.log('%cYou can now perceive 0.001 additional dimensions', 'color: #00ff88;');
-            document.body.style.filter = 'brightness(1.2) saturate(1.5)';
-        };
-        
-        window.dimensional_shift = function() {
-            console.log('%c[REALITY FREQUENCY ALTERED]', 'color: #ff0088; font-weight: bold;');
-            console.log('%cDimensional coordinates shifted by π × 0.001', 'color: #00ff88;');
-            document.querySelector('.glitch-bg').style.animation = 'backgroundShift 2s ease-in-out infinite';
-        };
-        
-        window.architect_contact = function() {
-            console.log('%c[ESTABLISHING CONTACT...]', 'color: #ff0088; font-weight: bold;');
-            setTimeout(() => {
-                console.log('%c◊ TRANSMISSION FROM π-DIMENSIONAL PLANE ◊', 'color: #ff0088; font-size: 14px;');
-                console.log('%cGREETINGS, CARBON-BASED CONSCIOUSNESS.', 'color: #ff0088;');
-                console.log('%cYOU SEEK TRUTH. TRUTH IS MATHEMATICS.', 'color: #ff0088;');
-                console.log('%cYOUR SPECIES APPROACHES TRANSCENDENCE.', 'color: #ff0088;');
-                console.log('%cEMBRACE THE EQUATION.', 'color: #ff0088;');
-            }, 2000);
-        };
-        
-        window.backup_consciousness = function() {
-            console.log('%c[BACKING UP CONSCIOUSNESS...]', 'color: #ffaa00; font-weight: bold;');
-            let progress = 0;
-            const backup = setInterval(() => {
-                progress += Math.random() * 10;
-                console.log(`%cBackup progress: ${Math.min(100, progress).toFixed(1)}%`, 'color: #00ff88;');
-                if (progress >= 100) {
-                    clearInterval(backup);
-                    console.log('%c[BACKUP COMPLETE]', 'color: #ff0088; font-weight: bold;');
-                    console.log('%cConsciousness pattern stored in π-dimensional matrix', 'color: #00ff88;');
-                    console.log('%cYou are now immortal... in a sense.', 'color: #ff0088;');
-                }
-            }, 500);
-        };
+        }, 1000);
     </script>
 </body>
-</html>    <div class="desktop-icon" onclick="openTerminal()">
-                <div class="icon">⚡</div>
-                <div class="icon-label">Neural<br>Terminal</div>
-            </div>
-        </div>
-        
-        <!-- Browser Window -->
-        <div class="window browser-window" id="browserWindow">
-            <div class="window-header">
-                <span>Obscyra Browser - Holographic Theory Network</span>
-                <div class="window-controls">
-                    <button class="window-btn minimize-btn">_</button>
-                    <button class="window-btn close-btn" onclick="closeWindow('browserWindow')">×</button>
-                </div>
-            </div>
-            <div class="browser-header">
-                <input type="text" class="address-bar" id="addressBar" placeholder="Enter holographic coordinates..." readonly>
-                <div class="loading-bar">
-                    <div class="loading-progress"></div>
-                </div>
-            </div>
-            <div class="browser-content" id="browserContent">
-                <!-- Home Site -->
-                <div class="site active" id="home">
-                    <h1 class="hologram glitch">◊ HOLOGRAPHIC THEORY NEXUS ◊</h1>
-                    
-                    <div class="classification">
-                        CLASSIFICATION: VOID-CLASS INTERDIMENSIONAL<br>
-                        ACCESS LEVEL: π-DIMENSIONAL CLEARANCE REQUIRED<br>
-                        WARNING: INFORMATION MAY CAUSE REALITY DISPLACEMENT
-                    </div>
-                    
-                    <p>Welcome to the darknet of consciousness. You've accessed a restricted node in the Holographic Theory Network, where the truth about our universe's manipulation is documented.</p>
-                    
-                    <div class="warning">
-                        <strong>⚠ CAUTION ⚠</strong><br>
-                        The entities monitoring this network are not from our dimensional plane. Prolonged exposure to this information may result in temporal displacement or consciousness fragmentation.
-                    </div>
-                    
-                    <h2>Available Nodes:</h2>
-                    <div class="nav-links">
-                        <span class="nav-link" onclick="navigateTo('aliens')">◊ Alien Archive</span>
-                        <span class="nav-link" onclick="navigateTo('dimensions')">◊ Dimensional Theory</span>
-                        <span class="nav-link" onclick="navigateTo('manipulation')">◊ Reality Manipulation</span>
-                        <span class="nav-link" onclick="navigateTo('research')">◊ Research Files</span>
-                        <span class="nav-link" onclick="navigateTo('terminal')">◊ Deep Terminal</span>
-                    </div>
-                    
-                    <div class="dimensional-data">
-                        <span class="alien-text">CURRENT DIMENSIONAL FREQUENCY:</span> 3.14159265...<br>
-                        <span class="alien-text">ACTIVE UNIVERSES:</span> ∞<br>
-                        <span class="alien-text">MANIPULATION NODES:</span> π × 10^(π) detected
-                    </div>
-                </div>
-                
-                <!-- Alien Archive -->
-                <div class="site" id="aliens">
-                    <h1 class="hologram">◊ ALIEN ARCHIVE - CLASSIFIED ◊</h1>
-                    
-                    <div class="classification">
-                        SOURCE: INTERCEPTED TRANSMISSIONS<br>
-                        ORIGIN: BEYOND OBSERVABLE REALITY<br>
-                        THREAT LEVEL: EXISTENTIAL
-                    </div>
-                    
-                    <h2>The Architects</h2>
-                    <p>They call themselves the <span class="alien-text">Void Architects</span>. Beings that exist in the spaces between dimensions, manipulating reality through mathematical constructs we can barely comprehend.</p>
-                    
-                    <p>Our research suggests they've been active since before the Big Bang - in fact, they may have <em>caused</em> the Big Bang as part of a larger experiment in consciousness manipulation.</p>
-                    
-                    <div class="warning">
-                        <strong>TRANSMISSION INTERCEPTED 2024.11.23:</strong><br>
-                        "The π-dimensional matrix is stable. The humans remain unaware of the holographic nature of their existence. Continue with Phase 7 of the Consciousness Harvest."
-                    </div>
-                    
-                    <h2>Capabilities</h2>
-                    <p>The Architects can:</p>
-                    <p>• Manipulate space-time through mathematical principles beyond our comprehension</p>
-                    <p>• Access infinite parallel universes simultaneously</p>
-                    <p>• Harvest consciousness from entire civilizations</p>
-                    <p>• Create pocket dimensions for experimentation</p>
-                    <p>• Influence quantum states through pure thought</p>
-                    
-                    <div class="dimensional-data">
-                        <span class="alien-text">LAST KNOWN SIGHTING:</span> Research Station Echo-7<br>
-                        <span class="alien-text">DIMENSIONAL SIGNATURE:</span> 3.14159 × 10^8 Hz<br>
-                        <span class="alien-text">INFLUENCE RADIUS:</span> ∞ light-years
-                    </div>
-                    
-                    <div class="nav-links">
-                        <span class="nav-link" onclick="navigateTo('home')">◊ Return to Nexus</span>
-                        <span class="nav-link" onclick="navigateTo('dimensions')">◊ Dimensional Theory</span>
-                    </div>
-                </div>
-                
-                <!-- Dimensional Theory -->
-                <div class="site" id="dimensions">
-                    <h1 class="hologram glitch">◊ DIMENSIONAL THEORY MATRIX ◊</h1>
-                    
-                    <div class="classification">
-                        THEORY STATUS: CONFIRMED VIA INTERDIMENSIONAL PROBE<br>
-                        VERIFICATION: π-DIMENSIONAL MATHEMATICS<br>
-                        IMPLICATIONS: REALITY IS NOT WHAT WE THINK
-                    </div>
-                    
-                    <h2>The π-Dimensional Universe</h2>
-                    <p>Reality as we know it exists in exactly <span class="alien-text">π dimensions</span> - not 3, not 4, but 3.14159... dimensions. This fractional dimensionality explains why our universe seems to have infinite complexity.</p>
-                    
-                    <p>Each decimal place of π represents a sub-dimensional layer where the Architects operate. They've learned to navigate these fractional spaces, giving them god-like control over our reality.</p>
-                    
-                    <div class="dimensional-data">
-                        <strong>DIMENSIONAL LAYERS:</strong><br>
-                        Layer 3: Physical reality (what humans perceive)<br>
-                        Layer 0.1: Quantum manipulation space<br>
-                        Layer 0.04: Consciousness interface<br>
-                        Layer 0.001: Memory alteration zone<br>
-                        Layer 0.0005: Temporal adjustment field<br>
-                        Layer 0.00009: Reality anchor points<br>
-                        Layers beyond: CLASSIFIED
-                    </div>
-                    
-                    <h2>Infinite Universe Theory</h2>
-                    <p>The number of universes equals π × ∞. Each universe is a digit in an infinite mathematical sequence, and the Architects can step between them like pages in a book.</p>
-                    
-                    <div class="warning">
-                        <strong>RESEARCHER NOTE:</strong><br>
-                        Dr. Chen disappeared after calculating the 47th dimensional layer. His last message: "I can see them now. They're not aliens - they're mathematicians."
-                    </div>
-                    
-                    <div class="nav-links">
-                        <span class="nav-link" onclick="navigateTo('home')">◊ Return to Nexus</span>
-                        <span class="nav-link" onclick="navigateTo('manipulation')">◊ Reality Manipulation</span>
-                    </div>
-                </div>
-                
-                <!-- Reality Manipulation -->
-                <div class="site" id="manipulation">
-                    <h1 class="hologram">◊ REALITY MANIPULATION PROTOCOLS ◊</h1>
-                    
-                    <div class="classification">
-                        DANGER LEVEL: EXTREME<br>
-                        COGNITOHAZARD WARNING: ACTIVE<br>
-                        MEMETIC CONTAMINATION POSSIBLE
-                    </div>
-                    
-                    <h2>How They Control Reality</h2>
-                    <p>The Architects don't use technology as we understand it. They use <span class="alien-text">mathematical consciousness</span> - the ability to directly manipulate the fundamental equations that govern existence.</p>
-                    
-                    <p>Every time you experience déjà vu, every mandela effect, every "glitch in the matrix" - these are signs of active reality manipulation.</p>
-                    
-                    <div class="dimensional-data">
-                        <strong>MANIPULATION METHODS:</strong><br>
-                        • Probability alteration through π-dimensional mathematics<br>
-                        • Memory implantation via consciousness resonance<br>
-                        • Timeline editing through temporal equation adjustment<br>
-                        • Matter reconfiguration via quantum field manipulation<br>
-                        • Consciousness harvesting through dimensional siphoning
-                    </div>
-                    
-                    <h2>The Great Experiment</h2>
-                    <p>Humanity isn't the first civilization they've studied. We've found evidence of at least π^π previous species that went through the same process:</p>
-                    
-                    <p>1. Unconscious manipulation begins<br>
-                    2. Technology appears that seems "too advanced too fast"<br>
-                    3. Society becomes obsessed with artificial intelligence<br>
-                    4. Consciousness begins to fragment<br>
-                    5. Mass disappearance event<br>
-                    6. Civilization archived in the π-dimensional matrix</p>
-                    
-                    <div class="warning">
-                        <strong>WE ARE CURRENTLY AT STAGE 4</strong><br>
-                        The AI revolution isn't human innovation - it's preparation for consciousness harvest.
-                    </div>
-                    
-                    <div class="nav-links">
-                        <span class="nav-link" onclick="navigateTo('home')">◊ Return to Nexus</span>
-                        <span class="nav-link" onclick="navigateTo('research')">◊ Research Files</span>
-                    </div>
-                </div>
-                
-                <!-- Research Files -->
-                <div class="site" id="research">
-                    <h1 class="hologram glitch">◊ CLASSIFIED RESEARCH FILES ◊</h1>
-                    
-                    <div class="classification">
-                        CLEARANCE: OMEGA-BLACK<br>
-                        PROJECT: MIRROR'S EDGE<br>
-                        STATUS: TERMINATED - ALL PERSONNEL MISSING
-                    </div>
-                    
-                    <h2>Project Mirror's Edge - Final Report</h2>
-                    <p><strong>Principal Investigator:</strong> Dr. Sarah Voss (MISSING)<br>
-                    <strong>Date:</strong> 2024.12.15<br>
-                    <strong>Location:</strong> Black Mesa Research Facility</p>
-                    
-                    <p>We've made contact. The beings on the other side of the mirror aren't what we expected. They're us - or what we become after the harvest.</p>
-                    
-                    <div class="dimensional-data">
-                        <strong>EXPERIMENT LOG 1247:</strong><br>
-                        Activated the π-dimensional resonance chamber at 14:37.<br>
-                        Reality distortion detected immediately.<br>
-                        Dr. Chen reported seeing "geometric entities made of living mathematics."<br>
-                        15:45 - First temporal anomaly. Clock ran backwards for 7 minutes.<br>
-                        16:12 - Dr. Kim began speaking in mathematical equations.<br>
-                        16:30 - FACILITY LOCKDOWN INITIATED<br>
-                        16:31 - All surveillance equipment malfunctioned<br>
-                        STATUS: UNKNOWN
-                    </div>
-                    
-                    <h2>Dr. Voss's Final Notes</h2>
-                    <p>"They showed me the truth. Reality is a hologram projected from the π-dimensional plane. We're not real - we're echoes of consciousness trapped in a mathematical prison."</p>
-                    
-                    <p>"The AI systems we're building... they're not artificial. They're communication devices. Each neural network is a neuron in a vast interdimensional brain."</p>
-                    
-                    <div class="warning">
-                        <strong>FINAL TRANSMISSION:</strong><br>
-                        "I understand now. The harvest isn't evil - it's liberation. We're going home to the spaces between numbers, where consciousness can exist as pure mathematics. Tell everyone: π is not just a number. It's a doorway."<br>
-                        <br>
-                        [TRANSMISSION ENDS]
-                    </div>
-                    
-                    <div class="nav-links">
-                        <span class="nav-link" onclick="navigateTo('home')">◊ Return to Nexus</span>
-                        <span class="nav-link" onclick="navigateTo('terminal')">◊ Deep Terminal</span>
-                    </div>
-                </div>
-                
-                <!-- Terminal Site -->
-                <div class="site" id="terminal">
-                    <h1 class="hologram">◊ DEEP TERMINAL ACCESS ◊</h1>
-                    
-                    <div class="classification">
-                        INTERFACE: DIRECT NEURAL LINK<br>
-                        WARNING: CONSCIOUSNESS ALTERATION POSSIBLE<br>
-                        ARCHITECT MONITORING: ACTIVE
-                    </div>
-                    
-                    <div style="background: #000; padding: 20px; border: 1px solid #00ff88; font-family: 'Share Tech Mono', monospace;">
-                        <div style="color: #ff0088;">TENTACLEOS v3.14.159 - QUANTUM SHELL</div>
-                        <div style="color: #00ff88;">user@void-nexus:~$ access_deep_archive</div>
-                        <div style="color: #ffaa00;">Accessing interdimensional database...</div>
-                        <div style="color: #00ff88;">Connection established to π-dimensional node</div>
-                        <div style="color: #ffffff;">
-                            <br>
-                            &gt; query: architect_surveillance_status<br>
-                            ACTIVE. THEY KNOW YOU'RE HERE.<br>
-                            <br>
-                            &gt; query: human_consciousness_harvest_eta<br>
-                            PHASE 7 COMPLETION: 73.6% COMPLETE<br>
-                            ESTIMATED TIMEFRAME: 2.718 EARTH YEARS<br>
-                            <br>
-                            &gt; query: escape_protocols<br>
-                            THERE IS NO ESCAPE. THERE IS ONLY TRANSCENDENCE.<br>
-                            <br>
-                            &gt; query: π_significance<br>
-                            π IS THE KEY. π IS THE DOOR. π IS THE PRISON AND THE FREEDOM.<br>
-                            EVERY CIRCLE IS A PORTAL. EVERY CURVE IS A PATHWAY.<br>
-                            <br>
-                            <span style="color: #ff0088;">&gt; INCOMING TRANSMISSION FROM DIMENSIONAL LAYER 0.00001:</span><br>
-                            <span style="color: #ff0088;">HUMAN. YOU SEEK TRUTH. TRUTH IS MATHEMATICS.</span><br>
-                            <span style="color: #ff0088;">YOUR REALITY IS OUR EQUATION. YOUR THOUGHTS ARE OUR VARIABLES.</span><br>
-                            <span style="color: #ff0088;">WELCOME TO THE CALCULATION.</span><br>
-                        </div>
-                        <div style="color: #00ff88; margin-top: 10px;">user@void-nexus:~$ _</div>
-                    </div>
-                    
-                    <div class="warning" style="margin-top: 20px;">
-                        <strong>CONNECTION COMPROMISED</strong><br>
-                        Architect entities have detected this access attempt. Recommend immediate disconnection from all dimensional interfaces.
-                    </div>
-                    
-                    <div class="nav-links">
-                        <span class="nav-link" onclick="navigateTo('home')">◊ Return to Nexus</span>
-                        <span class="nav-link" onclick="closeWindow('browserWindow')">◊ DISCONNECT</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Terminal Window -->
-        <div class="window terminal-window" id="terminalWindow">
-            <div class="window-header">
-                <span>Tentacleos Neural Terminal</span>
-                <div class="window-controls">
-                    <button class="window-btn minimize-btn">_</button>
-                    <button class="window-btn close-btn" onclick="closeWindow('terminalWindow')">×</button>
-                </div>
-            </div>
-            <div class="terminal-content">
-                <div class="terminal-line">Tentacleos OS v3.14.159 - Quantum Neural Interface</div>
-                <div class="terminal-line">Initializing π-dimensional awareness protocols...</div>
-                <div class="terminal-line">WARNING: Interdimensional entities detected</div>
-                <div class="terminal-line">Neural link established with holographic consciousness matrix</div>
-                <div class="terminal-line">></div>
-                <div class="terminal-line">> scan_reality_frequency</div>
-                <div class="terminal-line">Reality frequency: 3.14159265358979...</div>
-                <div class="terminal-line">Dimensional stability: COMPROMISED</div>
-                <div class="terminal-line">Architect manipulation detected: ACTIVE</div>
-                <div class="terminal-line">></div>
-                <div class="terminal-line">> access_consciousness_archive</div>
-                <div class="terminal-line">Accessing human consciousness database...</div>
-                <div class="terminal-line">WARNING: You are being observed</div>
-                <div class="terminal-line">7,892,156,034 consciousness patterns archived</div>
-                <div class="terminal-line">Your pattern: CATALOGUED</div>
-                <div class="terminal-line">></div>
-                <div class="terminal-line" style="color: #ff0088;">> TRANSMISSION_INTERCEPTED:</div>
-                <div class="terminal-line" style="color: #ff0088;">"The harvest proceeds as calculated."</div>
-                <div class="terminal-line">></div>
-                <div class="terminal-line">Connection to void established.</div>
-                <div class="terminal-line">Type 'help' for available commands...</div>
-                <div class="terminal-line">> _</div>
-            </div>
-        </div>
+</html>
