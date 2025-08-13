@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Non-Euclidean Shader World</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+        canvas {
+            display: block;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 300px;
+        }
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background-color: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #lore-note {
+            position: absolute;
+            bottom: 10%;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+            display: none; /* Hidden by default */
+            font-size: 1.2em;
+            color: #ccc;
+            text-shadow: 0 0 8px #000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="info">
+        Use WASD to move, and your mouse to look around. Some paths lead to other places.
+    </div>
+    <div id="crosshair"></div>
+    <div id="lore-note"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        // --- Basic Setup ---
+        let scene, camera, renderer;
+        let clock = new THREE.Clock();
+        let floor, wall1, wall2, wall3;
+        let materials = {};
+        let portalsGroup; // Group to hold visible portal meshes
+
+        // --- World State ---
+        let currentWorldId = 'start';
+        let isTeleporting = false;
+
+        // --- Movement & Controls ---
+        let controls = { moveForward: false, moveBackward: false, moveLeft: false, moveRight: false };
+        let velocity = new THREE.Vector3();
+        let direction = new THREE.Vector3();
+        const moveSpeed = 40.0;
+        const lookSpeed = 0.002;
+
+        // --- Shaders ---
+        const vertexShader = `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        // --- All fragment shaders (Original, Wilder, and new Portal Shader) ---
+        const floorFragmentShader1 = `/* ... Original Floor Shader ... */
+            uniform float time; varying vec2 vUv;
+            vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+            vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+            vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+            float snoise(vec3 v) {
+                const vec2 C = vec2(1.0/6.0, 1.0/3.0); const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+                vec3 i  = floor(v + dot(v, C.yyy)); vec3 x0 = v - i + dot(i, C.xxx);
+                vec3 g = step(x0.yzx, x0.xyz); vec3 l = 1.0 - g;
+                vec3 i1 = min(g.xyz, l.zxy); vec3 i2 = max(g.xyz, l.zxy);
+                vec3 x1 = x0 - i1 + C.xxx; vec3 x2 = x0 - i2 + C.yyy; vec3 x3 = x0 - D.yyy;
+                i = mod289(i); x0 = mod289(x0);
+                vec4 p = permute(permute(permute( i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+                float n_ = 0.142857142857; vec3 ns = n_ * D.wyz - D.xzx;
+                vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+                vec4 x_ = floor(j * ns.z); vec4 y_ = floor(j - 7.0 * x_);
+                vec4 x = x_ * ns.x + ns.yyyy; vec4 y = y_ * ns.x + ns.yyyy;
+                vec4 h = 1.0 - abs(x) - abs(y);
+                vec4 b0 = vec4(x.xy, y.xy); vec4 b1 = vec4(x.zw, y.zw);
+                vec4 s0 = floor(b0)*2.0 + 1.0; vec4 s1 = floor(b1)*2.0 + 1.0;
+                vec4 sh = -step(h, vec4(0.0));
+                vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy; vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+                vec3 p0 = vec3(a0.xy,h.x); vec3 p1 = vec3(a0.zw,h.y); vec3 p2 = vec3(a1.xy,h.z); vec3 p3 = vec3(a1.zw,h.w);
+                vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+                p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+                vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                m = m * m;
+                return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+            }
+            void main() {
+                vec2 p = vUv * 5.0; float n = snoise(vec3(p.x, p.y, time * 0.1));
+                vec3 color = mix(vec3(0.0, 0.1, 0.8), vec3(0.5, 0.8, 1.0), n);
+                gl_FragColor = vec4(color, 1.0);
+            }`;
+        const wallFragmentShader1 = `/* ... Original Wall 1 Shader ... */
+            uniform float time; varying vec2 vUv;
+            void main() {
+                vec2 p = vUv * 10.0; p.x += sin(p.y * 2.0 + time) * 0.5; p.y += cos(p.x * 2.0 + time) * 0.5;
+                float grid = max(step(0.95, fract(p.x)), step(0.95, fract(p.y)));
+                vec3 color = mix(vec3(0.1, 0.0, 0.2), vec3(0.9, 0.2, 0.8), grid);
+                gl_FragColor = vec4(color, 1.0);
+            }`;
+        const wallFragmentShader2 = `/* ... Original Wall 2 Shader ... */
+            uniform float time; varying vec2 vUv;
+            float random(vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123); }
+            void main() {
+                vec2 st = vUv; st.x *= (16.0/9.0); vec3 color = vec3(0.01, 0.0, 0.02);
+                st.y += time * 0.1; vec2 grid = fract(st * 50.0); vec2 id = floor(st * 50.0);
+                float star = random(id);
+                if (star > 0.99) {
+                    float size = (star - 0.99) * 100.0; color = vec3(1.0);
+                    float dist = distance(grid, vec2(0.5)); color *= 1.0 - smoothstep(0.0, 0.2 * size, dist);
+                }
+                gl_FragColor = vec4(color, 1.0);
+            }`;
+        const wallFragmentShader3 = `/* ... Original Wall 3 Shader ... */
+            uniform float time; varying vec2 vUv;
+            float random (vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123); }
+            void main() {
+                vec2 st = vUv; float rnd = random(vec2(floor(st.y * 20.0), time * 0.1));
+                if (rnd > 0.95) { st.x += (random(vec2(time, st.y)) - 0.5) * 0.2; }
+                float noise = random(st * random(vec2(time)));
+                vec3 color = vec3(noise * 0.2, noise * 0.8, noise * 0.5);
+                gl_FragColor = vec4(color, 1.0);
+            }`;
+        const organicTunnelShader = `/* ... Organic Tunnel Shader ... */
+            uniform float time; varying vec2 vUv;
+            void main() {
+                vec2 p = -1.0 + 2.0 * vUv;
+                float a = atan(p.y, p.x);
+                float r = length(p);
+                vec2 uv = vec2(1.0/r + time*0.2, a);
+                float f = cos(uv.x*2.0)*cos(uv.y*6.0);
+                vec3 color = mix(vec3(0.5, 0.1, 0.1), vec3(0.1, 0.0, 0.0), smoothstep(0.0, 0.2, f));
+                gl_FragColor = vec4(color, 1.0);
+            }`;
+        const staticVoidShader = `/* ... Static Void Shader ... */
+            uniform float time; varying vec2 vUv;
+            float random(vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123); }
+            void main() {
+                vec2 st = vUv * sin(time);
+                float rnd = random( st );
+                gl_FragColor = vec4(vec3(rnd), 1.0);
+            }`;
+        const eyeShader = `/* ... Eye Shader ... */
+            uniform float time; varying vec2 vUv;
+            void main() {
+                vec2 p = -1.0 + 2.0 * vUv;
+                float r = length(p);
+                float a = atan(p.y, p.x);
+                float pulse = sin(time * 2.0) * 0.1 + 0.9;
+                float iris = smoothstep(0.4 * pulse, 0.38 * pulse, r);
+                iris -= smoothstep(0.1, 0.08, r);
+                vec3 irisColor = vec3(0.8, 0.2, 0.1);
+                vec3 scleraColor = vec3(0.9);
+                vec3 color = mix(scleraColor, irisColor, iris);
+                gl_FragColor = vec4(color, 1.0);
+            }`;
+        
+        // NEW SHADER FOR VISIBLE PORTALS
+        const portalFragmentShader = `
+            uniform float time;
+            varying vec2 vUv;
+            float random(vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123); }
+            void main() {
+                vec2 st = vUv;
+                st.y *= 2.0;
+                st.y += time * 0.3; // vertical drift
+                float r = random(floor(st*20.0));
+                float glitch = pow(r, 20.0); // makes it sparse
+                
+                vec3 color = vec3(glitch * 0.8, glitch, glitch * 0.9);
+                
+                // Fade at edges
+                float edgeFade = smoothstep(0.0, 0.5, vUv.x) * (1.0 - smoothstep(0.5, 1.0, vUv.x));
+                edgeFade *= smoothstep(0.0, 0.5, vUv.y) * (1.0 - smoothstep(0.5, 1.0, vUv.y));
+
+                gl_FragColor = vec4(color, glitch * edgeFade * 0.7);
+            }
+        `;
+
+        // --- World Data ---
+        const worlds = {
+            'start': {
+                shaders: { floor: 'floor1', wall1: 'wall1', wall2: 'wall2', wall3: 'wall3' },
+                portals: [
+                    { 
+                        triggerBox: new THREE.Box3(new THREE.Vector3(-10, 0, -55), new THREE.Vector3(10, 20, -45)), 
+                        toWorld: 'the_void', 
+                        entryPoint: new THREE.Vector3(0, 5, 80),
+                        position: new THREE.Vector3(0, 10, -49.9),
+                        rotation: new THREE.Euler(0, 0, 0),
+                        size: new THREE.Vector2(20, 20)
+                    }
+                ],
+                lore: [
+                    { box: new THREE.Box3(new THREE.Vector3(-5, 0, 5), new THREE.Vector3(5, 10, 15)), text: "It feels like the walls are watching." }
+                ]
+            },
+            'the_void': {
+                shaders: { floor: 'static_void', wall1: 'eye', wall2: 'static_void', wall3: 'static_void' },
+                portals: [
+                     { 
+                        triggerBox: new THREE.Box3(new THREE.Vector3(-10, 0, 95), new THREE.Vector3(10, 20, 105)), 
+                        toWorld: 'tunnels', 
+                        entryPoint: new THREE.Vector3(0, 5, 0),
+                        position: new THREE.Vector3(0, 10, 99.9),
+                        rotation: new THREE.Euler(0, Math.PI, 0), // Flipped to face camera
+                        size: new THREE.Vector2(20, 20)
+                     }
+                ],
+                lore: [
+                    { box: new THREE.Box3(new THREE.Vector3(40, 0, 40), new THREE.Vector3(60, 10, 60)), text: "The noise... it's a language I almost understand." }
+                ]
+            },
+            'tunnels': {
+                shaders: { floor: 'organic_tunnel', wall1: 'organic_tunnel', wall2: 'organic_tunnel', wall3: 'organic_tunnel' },
+                portals: [
+                    { 
+                        triggerBox: new THREE.Box3(new THREE.Vector3(-10, 0, -10), new THREE.Vector3(10, 20, 10)), 
+                        toWorld: 'start', 
+                        entryPoint: new THREE.Vector3(0, 5, 0),
+                        position: new THREE.Vector3(0, 10, 0),
+                        rotation: new THREE.Euler(0, 0, 0),
+                        size: new THREE.Vector2(20, 20)
+                    }
+                ],
+                lore: [
+                    { box: new THREE.Box3(new THREE.Vector3(20, 0, -25), new THREE.Vector3(30, 10, -15)), text: "I think this place is alive. Or it used to be." }
+                ]
+            }
+        };
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111);
+            scene.fog = new THREE.Fog(0x111111, 0, 150);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 20);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // --- Create all materials once ---
+            const createShaderMaterial = (fs, transparent = false) => new THREE.ShaderMaterial({
+                uniforms: { time: { value: 0.0 } },
+                vertexShader: vertexShader,
+                fragmentShader: fs,
+                transparent: transparent,
+                depthWrite: !transparent
+            });
+            materials.floor1 = createShaderMaterial(floorFragmentShader1);
+            materials.wall1 = createShaderMaterial(wallFragmentShader1);
+            materials.wall2 = createShaderMaterial(wallFragmentShader2);
+            materials.wall3 = createShaderMaterial(wallFragmentShader3);
+            materials.organic_tunnel = createShaderMaterial(organicTunnelShader);
+            materials.static_void = createShaderMaterial(staticVoidShader);
+            materials.eye = createShaderMaterial(eyeShader);
+            materials.portal = createShaderMaterial(portalFragmentShader, true); // Portal is transparent
+
+            // --- Create world geometry ---
+            const planeSize = 200;
+            const floorGeometry = new THREE.PlaneGeometry(planeSize, planeSize);
+            const wallGeometry = new THREE.PlaneGeometry(planeSize, planeSize / 2);
+            floor = new THREE.Mesh(floorGeometry);
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+            wall1 = new THREE.Mesh(wallGeometry);
+            wall1.position.set(0, planeSize / 4, -planeSize / 2);
+            scene.add(wall1);
+            wall2 = new THREE.Mesh(wallGeometry);
+            wall2.position.set(-planeSize / 2, planeSize / 4, 0);
+            wall2.rotation.y = Math.PI / 2;
+            scene.add(wall2);
+            wall3 = new THREE.Mesh(wallGeometry);
+            wall3.position.set(planeSize / 2, planeSize / 4, 0);
+            wall3.rotation.y = -Math.PI / 2;
+            scene.add(wall3);
+            
+            // --- Create portal group ---
+            portalsGroup = new THREE.Group();
+            scene.add(portalsGroup);
+
+            // --- Load initial world ---
+            loadWorld('start');
+
+            // --- Event Listeners ---
+            document.addEventListener('click', () => document.body.requestPointerLock());
+            document.addEventListener('mousemove', onMouseMove, false);
+            document.addEventListener('keydown', onKeyDown, false);
+            document.addEventListener('keyup', onKeyUp, false);
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function loadWorld(worldId) {
+            if (!worlds[worldId]) return;
+            currentWorldId = worldId;
+            const worldData = worlds[worldId];
+            
+            // Update wall/floor materials
+            floor.material = materials[worldData.shaders.floor];
+            wall1.material = materials[worldData.shaders.wall1];
+            wall2.material = materials[worldData.shaders.wall2];
+            wall3.material = materials[worldData.shaders.wall3];
+
+            // Clear old portals and create new ones
+            while (portalsGroup.children.length > 0) {
+                portalsGroup.remove(portalsGroup.children[0]);
+            }
+
+            if (worldData.portals) {
+                for (const portalData of worldData.portals) {
+                    const portalGeometry = new THREE.PlaneGeometry(portalData.size.x, portalData.size.y);
+                    const portalMesh = new THREE.Mesh(portalGeometry, materials.portal);
+                    portalMesh.position.copy(portalData.position);
+                    portalMesh.rotation.copy(portalData.rotation);
+                    portalsGroup.add(portalMesh);
+                }
+            }
+        }
+
+        function checkPortals() {
+            if (isTeleporting) return;
+            const worldData = worlds[currentWorldId];
+            if (!worldData.portals) return;
+
+            for (const portal of worldData.portals) {
+                if (portal.triggerBox.containsPoint(camera.position)) {
+                    isTeleporting = true;
+                    // Fade out effect
+                    document.body.style.transition = 'opacity 0.5s';
+                    document.body.style.opacity = 0;
+                    
+                    setTimeout(() => {
+                        camera.position.copy(portal.entryPoint);
+                        loadWorld(portal.toWorld);
+                        // Fade back in
+                        document.body.style.opacity = 1;
+                        setTimeout(() => { isTeleporting = false; }, 500); // Cooldown
+                    }, 500);
+                    break;
+                }
+            }
+        }
+        
+        const loreNoteElement = document.getElementById('lore-note');
+        let currentLoreText = '';
+        function checkLore() {
+            const worldData = worlds[currentWorldId];
+            let inLoreZone = false;
+            if (worldData.lore) {
+                for (const lore of worldData.lore) {
+                    if (lore.box.containsPoint(camera.position)) {
+                        inLoreZone = true;
+                        if (currentLoreText !== lore.text) {
+                            loreNoteElement.innerText = lore.text;
+                            loreNoteElement.style.display = 'block';
+                            currentLoreText = lore.text;
+                        }
+                        break;
+                    }
+                }
+            }
+            if (!inLoreZone && currentLoreText !== '') {
+                loreNoteElement.style.display = 'none';
+                currentLoreText = '';
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+            const time = clock.getElapsedTime();
+            
+            // Update all shader uniforms
+            for (const key in materials) {
+                materials[key].uniforms.time.value = time;
+            }
+
+            // Update movement
+            velocity.x -= velocity.x * 10.0 * delta;
+            velocity.z -= velocity.z * 10.0 * delta;
+            direction.z = Number(controls.moveForward) - Number(controls.moveBackward);
+            direction.x = Number(controls.moveRight) - Number(controls.moveLeft);
+            direction.normalize();
+            if (controls.moveForward || controls.moveBackward) velocity.z -= direction.z * moveSpeed * delta;
+            if (controls.moveLeft || controls.moveRight) velocity.x -= direction.x * moveSpeed * delta;
+            camera.translateX(-velocity.x * delta);
+            camera.translateZ(velocity.z * delta);
+            camera.position.y = 5;
+
+            // Check for world transitions and lore
+            checkPortals();
+            checkLore();
+
+            renderer.render(scene, camera);
+        }
+        
+        // --- Unchanged Functions ---
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        function onMouseMove(event) {
+            if (document.pointerLockElement === document.body) {
+                camera.rotation.y -= event.movementX * lookSpeed;
+                camera.rotation.x -= event.movementY * lookSpeed;
+                camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
+            }
+        }
+        function onKeyDown(event) {
+            switch (event.code) {
+                case 'KeyW': controls.moveForward = true; break;
+                case 'KeyA': controls.moveLeft = true; break;
+                case 'KeyS': controls.moveBackward = true; break;
+                case 'KeyD': controls.moveRight = true; break;
+            }
+        }
+        function onKeyUp(event) {
+            switch (event.code) {
+                case 'KeyW': controls.moveForward = false; break;
+                case 'KeyA': controls.moveLeft = false; break;
+                case 'KeyS': controls.moveBackward = false; break;
+                case 'KeyD': controls.moveRight = false; break;
+            }
+        }
+
+        init();
+        animate();
+    </script>
+</body>
+</html>
