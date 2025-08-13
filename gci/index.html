@@ -32,38 +32,256 @@
             border: 2px solid rgba(0, 150, 255, 0.5);
             box-shadow: 0 0 20px rgba(0, 150, 255, 0.3);
         }
+
+        /* Enhanced Pause Menu Styling */
         #pause-menu {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, rgba(0, 20, 40, 0.95), rgba(0, 40, 80, 0.95));
-            border: 3px solid rgba(0, 150, 255, 0.8);
-            border-radius: 15px;
-            padding: 40px;
-            color: white;
+            background: linear-gradient(145deg, 
+                rgba(0, 15, 25, 0.98) 0%,
+                rgba(5, 25, 35, 0.96) 25%,
+                rgba(0, 30, 45, 0.98) 50%,
+                rgba(0, 20, 30, 0.98) 75%,
+                rgba(0, 10, 20, 0.98) 100%
+            );
+            border: 3px solid #00ff88;
+            border-radius: 20px;
+            padding: 50px;
+            color: #00ff88;
             text-align: center;
-            font-size: 18px;
-            box-shadow: 0 0 50px rgba(0, 150, 255, 0.5);
+            font-size: 16px;
+            box-shadow: 
+                0 0 60px rgba(0, 255, 136, 0.4),
+                inset 0 0 30px rgba(0, 255, 136, 0.1),
+                0 0 120px rgba(0, 255, 136, 0.2);
             display: none;
-            min-width: 300px;
+            min-width: 450px;
+            min-height: 500px;
+            backdrop-filter: blur(10px);
+            animation: pauseMenuGlow 3s ease-in-out infinite alternate;
         }
+
+        @keyframes pauseMenuGlow {
+            0% { box-shadow: 0 0 60px rgba(0, 255, 136, 0.4), inset 0 0 30px rgba(0, 255, 136, 0.1), 0 0 120px rgba(0, 255, 136, 0.2); }
+            100% { box-shadow: 0 0 80px rgba(0, 255, 136, 0.6), inset 0 0 40px rgba(0, 255, 136, 0.15), 0 0 160px rgba(0, 255, 136, 0.3); }
+        }
+
         #pause-menu h2 {
             margin-top: 0;
-            color: #00aaff;
-            text-shadow: 0 0 10px rgba(0, 170, 255, 0.8);
-            font-size: 28px;
+            color: #00ff88;
+            text-shadow: 
+                0 0 15px rgba(0, 255, 136, 0.8),
+                0 0 30px rgba(0, 255, 136, 0.4),
+                0 0 45px rgba(0, 255, 136, 0.2);
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            animation: titlePulse 2s ease-in-out infinite alternate;
         }
-        #pause-menu .menu-item {
-            margin: 15px 0;
-            padding: 10px;
-            background: rgba(0, 100, 200, 0.2);
-            border: 1px solid rgba(0, 150, 255, 0.3);
+
+        @keyframes titlePulse {
+            0% { text-shadow: 0 0 15px rgba(0, 255, 136, 0.8), 0 0 30px rgba(0, 255, 136, 0.4), 0 0 45px rgba(0, 255, 136, 0.2); }
+            100% { text-shadow: 0 0 25px rgba(0, 255, 136, 1), 0 0 50px rgba(0, 255, 136, 0.6), 0 0 75px rgba(0, 255, 136, 0.3); }
+        }
+
+        /* Advanced Pause Menu Items */
+        .pause-section {
+            margin: 20px 0;
+            padding: 0;
+        }
+
+        .pause-section-title {
+            font-size: 18px;
+            color: #00ccff;
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.8);
+            margin-bottom: 15px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(0, 204, 255, 0.3);
+            padding-bottom: 8px;
+        }
+
+        .menu-item {
+            margin: 12px 0;
+            padding: 15px 20px;
+            background: linear-gradient(90deg, 
+                rgba(0, 40, 60, 0.3) 0%,
+                rgba(0, 60, 80, 0.4) 50%,
+                rgba(0, 40, 60, 0.3) 100%
+            );
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .menu-item:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .menu-item:hover:before {
+            left: 100%;
+        }
+
+        .menu-item:hover {
+            border-color: rgba(0, 255, 136, 0.6);
+            background: linear-gradient(90deg, 
+                rgba(0, 50, 70, 0.4) 0%,
+                rgba(0, 70, 90, 0.5) 50%,
+                rgba(0, 50, 70, 0.4) 100%
+            );
+            transform: translateX(5px);
+        }
+
+        .status-value {
+            color: #00ff88;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0, 255, 136, 0.5);
+        }
+
+        .status-critical {
+            color: #ff4400;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 68, 0, 0.5);
+            animation: criticalBlink 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes criticalBlink {
+            0% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .status-warning {
+            color: #ffaa00;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 170, 0, 0.5);
+        }
+
+        /* Console System Styling */
+        #console-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            z-index: 200;
+        }
+
+        #console-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 70%;
+            background: linear-gradient(135deg, 
+                rgba(0, 20, 30, 0.98) 0%,
+                rgba(0, 30, 40, 0.96) 100%
+            );
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            box-shadow: 
+                0 0 50px rgba(0, 255, 136, 0.3),
+                inset 0 0 20px rgba(0, 255, 136, 0.1);
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+        }
+
+        #console-header {
+            color: #00ff88;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+            letter-spacing: 2px;
+        }
+
+        #console-output {
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff88;
+            padding: 15px;
             border-radius: 8px;
+            height: 70%;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.4;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            margin-bottom: 15px;
         }
+
+        #console-input-container {
+            display: flex;
+            align-items: center;
+        }
+
+        #console-prompt {
+            color: #00ccff;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        #console-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 5px;
+            color: #00ff88;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            outline: none;
+        }
+
+        #console-input:focus {
+            border-color: rgba(0, 255, 136, 0.6);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+        }
+
+        /* Console Access Panel */
+        #console-access {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 20, 30, 0.9);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            color: #00ff88;
+            font-size: 12px;
+            display: none;
+        }
+
+        #password-input {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 3px;
+            color: #00ff88;
+            padding: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            width: 120px;
+        }
+
         .paused {
             filter: blur(3px);
         }
+
+        /* Start Menu - Keep existing styling but minor improvements */
         #start-menu {
             position: absolute;
             top: 50%;
@@ -80,6 +298,7 @@
             min-width: 300px;
             z-index: 100;
         }
+        
         #start-menu h2 {
             margin-top: 0;
             color: #00aaff;
@@ -87,6 +306,7 @@
             font-size: 32px;
             margin-bottom: 30px;
         }
+        
         #start-menu button {
             background-color: #00aaff;
             color: white;
@@ -97,10 +317,12 @@
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.1s ease;
         }
+        
         #start-menu button:hover {
             background-color: #0088cc;
             transform: translateY(-2px);
         }
+        
         #start-menu button:active {
             transform: translateY(0);
         }
@@ -112,6 +334,8 @@
 <body>
 
     <canvas id="renderCanvas"></canvas>
+    
+    <!-- Enhanced Controls Info -->
     <div id="controls-info">
         <b>🚀 TACTICAL CONTROLS:</b><br>
         <b>W/S:</b> Primary Thrust / Reverse<br>
@@ -119,26 +343,87 @@
         <b>R/F:</b> Pitch Control<br>
         <b>Q/E:</b> Roll Stabilizers<br>
         <b>SPACE:</b> Plasma Cannon<br>
-        <b>P:</b> Tactical Pause
+        <b>P:</b> Tactical Pause<br>
+        <b>~:</b> Console Access
     </div>
 
+    <!-- Enhanced Pause Menu -->
     <div id="pause-menu">
-        <h2>⚡ TACTICAL PAUSE ⚡</h2>
-        <div class="menu-item">
-            <strong>Mission Status:</strong> Active Combat Zone
+        <h2>⚡ TACTICAL SYSTEM INTERFACE ⚡</h2>
+        
+        <div class="pause-section">
+            <div class="pause-section-title">SHIP STATUS</div>
+            <div class="menu-item">
+                <strong>Hull Integrity:</strong> <span class="status-value" id="hull-status">100%</span>
+            </div>
+            <div class="menu-item">
+                <strong>Shield Systems:</strong> <span class="status-value" id="shield-status">ONLINE</span>
+            </div>
+            <div class="menu-item">
+                <strong>Weapon Systems:</strong> <span class="status-value" id="weapon-status">ARMED</span>
+            </div>
         </div>
-        <div class="menu-item">
-            <strong>Ship Systems:</strong> Operational
+
+        <div class="pause-section">
+            <div class="pause-section-title">MISSION DATA</div>
+            <div class="menu-item">
+                <strong>Mission Status:</strong> <span class="status-value" id="mission-status">ACTIVE COMBAT ZONE</span>
+            </div>
+            <div class="menu-item">
+                <strong>Hostile Contacts:</strong> <span class="status-warning" id="hostile-count">SCANNING...</span>
+            </div>
+            <div class="menu-item">
+                <strong>Sector:</strong> <span class="status-value" id="sector-info">GAMMA-7 NEBULA</span>
+            </div>
         </div>
-        <div class="menu-item">
-            <strong>Engine Audio:</strong> <span id="audio-status">Active</span>
+
+        <div class="pause-section">
+            <div class="pause-section-title">SYSTEM DIAGNOSTICS</div>
+            <div class="menu-item">
+                <strong>Engine Audio:</strong> <span class="status-value" id="audio-status">ACTIVE</span>
+            </div>
+            <div class="menu-item">
+                <strong>Navigation:</strong> <span class="status-value" id="nav-status">OPERATIONAL</span>
+            </div>
+            <div class="menu-item">
+                <strong>Life Support:</strong> <span class="status-value" id="life-support">NOMINAL</span>
+            </div>
         </div>
-        <div class="menu-item">
-            Press <strong>P</strong> to Resume Combat
+
+        <div class="pause-section">
+            <div class="pause-section-title">COMMAND OPTIONS</div>
+            <div class="menu-item" style="text-align: center; font-size: 16px;">
+                Press <strong>P</strong> to Resume Combat Operations
+            </div>
         </div>
     </div>
 
+    <!-- Console System -->
+    <div id="console-overlay">
+        <div id="console-container">
+            <div id="console-header">DARKSTAR TACTICAL CONSOLE v2.045</div>
+            <div id="console-output" class="console-text">
+System initialized...<br>
+Awaiting command input...<br>
+Type 'help' for available commands<br>
+<br>
+</div>
+            <div id="console-input-container">
+                <span id="console-prompt">DARKSTAR>></span>
+                <input type="text" id="console-input" autocomplete="off">
+            </div>
+        </div>
+    </div>
 
+    <!-- Console Access Panel -->
+    <div id="console-access">
+        <div>CONSOLE ACCESS</div>
+        <input type="password" id="password-input" placeholder="Password">
+        <button onclick="checkPassword()" style="background:#00ff88;color:#000;border:none;padding:5px 10px;border-radius:3px;cursor:pointer;">ACCESS</button>
+        <div style="margin-top:10px;font-size:10px;color:#666;">ESC to close</div>
+    </div>
+
+    <!-- Start Menu -->
     <div id="start-menu">
         <h2>🚀 SPACE COMBAT SIMULATOR 🚀</h2>
         <button id="startButton">START GAME</button>
@@ -149,34 +434,308 @@
 
     <script type="module" src="js/main.js"></script>
     <script>
-    // Debug sound button logic
-    window.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('debugSoundButton');
-      const result = document.getElementById('debugSoundResult');
-      btn.addEventListener('click', async () => {
-        try {
-          // Try to access the sound manager from the game instance if available
-          let soundManager = null;
-          if (window.game && window.game.soundManager) {
-            soundManager = window.game.soundManager;
-          } else if (window.lastSoundManager) {
-            soundManager = window.lastSoundManager;
-          }
-          if (!soundManager) {
-            // Try to find it from the module
-            if (window.BABYLON && BABYLON.Engine.audioEngine) {
-              BABYLON.Engine.audioEngine.unlock();
-            }
-            result.textContent = 'SoundManager not available yet. Start the game first.';
-            return;
-          }
-          soundManager.playSound('engineSound');
-          result.textContent = 'Tried to play engineSound. Check console for errors.';
-        } catch (e) {
-          result.textContent = 'Error: ' + e.message;
+        // Global variables for system management
+        let consoleUnlocked = false;
+        let gameStarted = false;
+        let isPaused = false;
+        let systemStatus = {
+            hull: 100,
+            shields: true,
+            weapons: true,
+            hostiles: Math.floor(Math.random() * 5) + 1,
+            lifeSupport: true
+        };
+
+        /**
+         * Initialize the enhanced pause menu system
+         * Sets up event listeners and system status updates
+         */
+        function initializePauseSystem() {
+            // Update system status periodically
+            setInterval(updateSystemStatus, 2000);
+            
+            // Keyboard event listeners
+            document.addEventListener('keydown', handleKeyPress);
+            
+            // Initialize console access hotkey
+            setupConsoleAccess();
         }
-      });
-    });
+
+        /**
+         * Handle all keyboard input for the enhanced interface
+         * @param {KeyboardEvent} event - The keyboard event
+         */
+        function handleKeyPress(event) {
+            switch(event.key.toLowerCase()) {
+                case 'p':
+                    if (gameStarted) togglePause();
+                    break;
+                case '`':
+                case '~':
+                    if (!document.getElementById('start-menu').style.display !== 'none') {
+                        toggleConsoleAccess();
+                    }
+                    break;
+                case 'escape':
+                    closeConsoleAccess();
+                    if (document.getElementById('console-overlay').style.display === 'block') {
+                        closeConsole();
+                    }
+                    break;
+            }
+        }
+
+        /**
+         * Toggle the enhanced pause menu
+         * Includes visual effects and system status updates
+         */
+        function togglePause() {
+            const pauseMenu = document.getElementById('pause-menu');
+            const canvas = document.getElementById('renderCanvas');
+            
+            isPaused = !isPaused;
+            
+            if (isPaused) {
+                pauseMenu.style.display = 'block';
+                canvas.classList.add('paused');
+                updatePauseMenuData();
+                // Pause game logic would go here
+                console.log('Game paused - systems on standby');
+            } else {
+                pauseMenu.style.display = 'none';
+                canvas.classList.remove('paused');
+                // Resume game logic would go here
+                console.log('Game resumed - combat systems active');
+            }
+        }
+
+        /**
+         * Update all system status displays in the pause menu
+         * Simulates real-time ship diagnostics
+         */
+        function updateSystemStatus() {
+            if (!isPaused) return;
+            
+            // Simulate minor system fluctuations
+            systemStatus.hull = Math.max(85, Math.min(100, systemStatus.hull + (Math.random() - 0.5) * 2));
+            systemStatus.hostiles = Math.max(0, systemStatus.hostiles + Math.floor((Math.random() - 0.7) * 2));
+            
+            updatePauseMenuData();
+        }
+
+        /**
+         * Update the pause menu display with current system data
+         */
+        function updatePauseMenuData() {
+            // Hull status with color coding
+            const hullElement = document.getElementById('hull-status');
+            hullElement.textContent = Math.floor(systemStatus.hull) + '%';
+            if (systemStatus.hull < 50) {
+                hullElement.className = 'status-critical';
+            } else if (systemStatus.hull < 80) {
+                hullElement.className = 'status-warning';
+            } else {
+                hullElement.className = 'status-value';
+            }
+
+            // Update other status displays
+            document.getElementById('shield-status').textContent = systemStatus.shields ? 'ONLINE' : 'OFFLINE';
+            document.getElementById('weapon-status').textContent = systemStatus.weapons ? 'ARMED' : 'DISARMED';
+            document.getElementById('hostile-count').textContent = systemStatus.hostiles + ' DETECTED';
+            document.getElementById('life-support').textContent = systemStatus.lifeSupport ? 'NOMINAL' : 'CRITICAL';
+            
+            // Random mission updates
+            const missions = ['ACTIVE COMBAT ZONE', 'PATROL SECTOR', 'RECON MISSION', 'ESCORT DUTY'];
+            document.getElementById('mission-status').textContent = missions[Math.floor(Date.now() / 10000) % missions.length];
+        }
+
+        /**
+         * Setup console access system
+         * Manages the password-protected console interface
+         */
+        function setupConsoleAccess() {
+            const passwordInput = document.getElementById('password-input');
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') checkPassword();
+            });
+        }
+
+        /**
+         * Toggle the console access panel
+         */
+        function toggleConsoleAccess() {
+            const accessPanel = document.getElementById('console-access');
+            if (accessPanel.style.display === 'block') {
+                accessPanel.style.display = 'none';
+            } else {
+                accessPanel.style.display = 'block';
+                document.getElementById('password-input').focus();
+            }
+        }
+
+        /**
+         * Close console access panel
+         */
+        function closeConsoleAccess() {
+            document.getElementById('console-access').style.display = 'none';
+            document.getElementById('password-input').value = '';
+        }
+
+        /**
+         * Check the entered password for console access
+         */
+        function checkPassword() {
+            const password = document.getElementById('password-input').value;
+            if (password === '2045') {
+                consoleUnlocked = true;
+                closeConsoleAccess();
+                openConsole();
+                addConsoleOutput('✓ Access granted. Welcome to DARKSTAR tactical console.', 'success');
+            } else {
+                addConsoleOutput('✗ Access denied. Invalid credentials.', 'error');
+                document.getElementById('password-input').value = '';
+            }
+        }
+
+        /**
+         * Open the main console interface
+         */
+        function openConsole() {
+            if (!consoleUnlocked) {
+                addConsoleOutput('✗ Console access restricted. Authentication required.', 'error');
+                return;
+            }
+            
+            document.getElementById('console-overlay').style.display = 'block';
+            document.getElementById('console-input').focus();
+            
+            // Setup console input handler
+            const consoleInput = document.getElementById('console-input');
+            consoleInput.onkeypress = function(e) {
+                if (e.key === 'Enter') {
+                    processConsoleCommand(consoleInput.value);
+                    consoleInput.value = '';
+                }
+            };
+        }
+
+        /**
+         * Close the console interface
+         */
+        function closeConsole() {
+            document.getElementById('console-overlay').style.display = 'none';
+        }
+
+        /**
+         * Add output to the console display
+         * @param {string} text - Text to display
+         * @param {string} type - Type of message (normal, success, error, warning)
+         */
+        function addConsoleOutput(text, type = 'normal') {
+            const output = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            let colorClass = '';
+            switch(type) {
+                case 'success': colorClass = 'style="color: #00ff88"'; break;
+                case 'error': colorClass = 'style="color: #ff4400"'; break;
+                case 'warning': colorClass = 'style="color: #ffaa00"'; break;
+            }
+            
+            output.innerHTML += `<span ${colorClass}>[${timestamp}] ${text}</span><br>`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        /**
+         * Process commands entered into the console
+         * @param {string} command - The command to process
+         */
+        function processConsoleCommand(command) {
+            const cmd = command.toLowerCase().trim();
+            addConsoleOutput(`> ${command}`, 'normal');
+            
+            switch(cmd) {
+                case 'help':
+                    addConsoleOutput('Available commands:', 'normal');
+                    addConsoleOutput('  help - Show this help message', 'normal');
+                    addConsoleOutput('  status - Display system status', 'normal');
+                    addConsoleOutput('  clear - Clear console output', 'normal');
+                    addConsoleOutput('  darkstar1 - Execute special protocol', 'normal');
+                    addConsoleOutput('  exit - Close console', 'normal');
+                    break;
+                    
+                case 'status':
+                    addConsoleOutput('=== SYSTEM STATUS REPORT ===', 'success');
+                    addConsoleOutput(`Hull Integrity: ${Math.floor(systemStatus.hull)}%`, 'normal');
+                    addConsoleOutput(`Shield Systems: ${systemStatus.shields ? 'ONLINE' : 'OFFLINE'}`, 'normal');
+                    addConsoleOutput(`Weapon Systems: ${systemStatus.weapons ? 'ARMED' : 'DISARMED'}`, 'normal');
+                    addConsoleOutput(`Life Support: ${systemStatus.lifeSupport ? 'NOMINAL' : 'CRITICAL'}`, 'normal');
+                    addConsoleOutput(`Hostile Contacts: ${systemStatus.hostiles}`, 'normal');
+                    break;
+                    
+                case 'clear':
+                    document.getElementById('console-output').innerHTML = '';
+                    addConsoleOutput('Console cleared.', 'success');
+                    break;
+                    
+                case 'darkstar1':
+                    addConsoleOutput('Executing DARKSTAR1 protocol...', 'warning');
+                    setTimeout(() => {
+                        addConsoleOutput('Opening secure channel to index2.html...', 'success');
+                        setTimeout(() => {
+                            window.open('index2.html', '_blank');
+                            addConsoleOutput('✓ DARKSTAR1 protocol completed successfully.', 'success');
+                        }, 1500);
+                    }, 1000);
+                    break;
+                    
+                case 'exit':
+                    addConsoleOutput('Closing console...', 'normal');
+                    setTimeout(closeConsole, 1000);
+                    break;
+                    
+                default:
+                    addConsoleOutput(`Unknown command: ${cmd}`, 'error');
+                    addConsoleOutput('Type "help" for available commands.', 'normal');
+            }
+        }
+
+        // Initialize systems when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            initializePauseSystem();
+            
+            // Debug sound button logic (keep existing functionality)
+            const btn = document.getElementById('debugSoundButton');
+            const result = document.getElementById('debugSoundResult');
+            btn.addEventListener('click', async () => {
+                try {
+                    let soundManager = null;
+                    if (window.game && window.game.soundManager) {
+                        soundManager = window.game.soundManager;
+                    } else if (window.lastSoundManager) {
+                        soundManager = window.lastSoundManager;
+                    }
+                    if (!soundManager) {
+                        if (window.BABYLON && BABYLON.Engine.audioEngine) {
+                            BABYLON.Engine.audioEngine.unlock();
+                        }
+                        result.textContent = 'SoundManager not available yet. Start the game first.';
+                        return;
+                    }
+                    soundManager.playSound('engineSound');
+                    result.textContent = 'Tried to play engineSound. Check console for errors.';
+                } catch (e) {
+                    result.textContent = 'Error: ' + e.message;
+                }
+            });
+            
+            // Start button handler
+            document.getElementById('startButton').addEventListener('click', () => {
+                document.getElementById('start-menu').style.display = 'none';
+                gameStarted = true;
+                console.log('Game started - all systems operational');
+            });
+        });
     </script>
 </body>
 </html>
