@@ -65,7 +65,7 @@
         .desktop-bg {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            background-color: transparent;
+            background-color: transparent; /* Let canvas show through */
             transition: all 1.5s ease-in-out;
             opacity: 0.5;
         }
@@ -131,9 +131,6 @@
         pre { white-space: pre-wrap; word-wrap: break-word; font-family: inherit;}
         .neofetch-logo { color: var(--accent-cyan); float: left; margin-right: 20px; font-size: 1.1em; text-shadow: 0 0 8px var(--accent-cyan); }
         .neofetch-info span { color: var(--accent-cyan); }
-
-        /* Loading indicator for apps */
-        .app-loading { position: fixed; top: 20px; right: 20px; background: var(--window-bg); border: 1px solid var(--border-color); padding: 10px 15px; border-radius: 4px; color: var(--accent-cyan); font-size: 12px; z-index: 2000; }
     </style>
 </head>
 <body>
@@ -168,586 +165,326 @@
 
     <div id="windowContainer"></div>
 
-    <script>
-    // Global TentacleOS API
-    window.TentacleOS = {
-        apps: new Map(),
-        icons: new Map(),
-        utils: {},
-        api: {}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const ICONS = {
+        logo: `<svg viewBox="0 0 100 100"><g style="transform-origin:center;animation:spin-logo 30s linear infinite" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" fill="none" stroke="currentColor"><path d="M50 30 C 20 40, 20 70, 50 80 S 80 60, 50 50 S 20 40, 50 30"></path><path d="M50 30 C 80 40, 80 70, 50 80 S 20 60, 50 50 S 80 40, 50 30"></path><path d="M50 30 C 40 10, 60 10, 50 30"></path><path d="M50 80 C 40 100, 60 100, 50 80"></path><circle cx="50" cy="50" r="12" fill="currentColor"></circle><circle cx="50" cy="50" r="45" stroke-width="1.5"></circle></g><style>@keyframes spin-logo{to{transform:rotate(360deg)}}</style></svg>`,
+        terminal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6M12 19h8"/></svg>`,
+        archives: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="2"></circle></svg>`,
+        manual: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>`,
+        gci: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M12 12a4.4 4.4 0 100-8.8 4.4 4.4 0 000 8.8zM2.5 12C2.5 7 7 2.5 12 2.5S21.5 7 21.5 12M12 18s-4-2-4-6c0-2.2 1.8-4 4-4s4 1.8 4 4c0 4-4 6-4 6z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" fill="currentColor"/></svg>`,
+        primarch: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10c0-2-1-4-3-5.5s-4.5-3-6.5-3-4.5 1.5-6.5 3S2 10 2 12"/><path d="M12 2a10 10 0 1 1-10 10c0-2 1-4 3-5.5s4.5-3 6.5-3 4.5 1.5 6.5 3 3 3.5 3 5.5"/><circle cx="12" cy="12" r="3.5"/></svg>`,
+        neofetch: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-10 0a10 10 0 1 0 20 0a10 10 0 1 0-20 0"/><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>`,
+        shutdown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>`
+    };
+    
+    // Corrected paths for Secure Archives
+    const passwordVault = {
+        'ARKLAY_88': 'gci/index1.html', 'PROGENITOR': 'gci/index2.html', 'UROBOROS': 'gci/index3.html',
+        'CADOU_PARASITE': 'gci/index4.html', 'ISHIMURA_USG': 'gci/index5.html', 'AEGIS_7': 'gci/index6.html',
+        'LUNAR_PYRAMID': 'gci/index7.html', 'KENDALL_44': 'gci/index8.html', 'BYRGENWERTH': 'gci/index9.html',
+        'MOON_PRESENCE': 'gci/index10.html'
     };
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        
-        // Core Icons Library
-        const CORE_ICONS = {
-            logo: `<svg viewBox="0 0 100 100"><g style="transform-origin:center;animation:spin-logo 30s linear infinite" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" fill="none" stroke="currentColor"><path d="M50 30 C 20 40, 20 70, 50 80 S 80 60, 50 50 S 20 40, 50 30"></path><path d="M50 30 C 80 40, 80 70, 50 80 S 20 60, 50 50 S 80 40, 50 30"></path><path d="M50 30 C 40 10, 60 10, 50 30"></path><path d="M50 80 C 40 100, 60 100, 50 80"></path><circle cx="50" cy="50" r="12" fill="currentColor"></circle><circle cx="50" cy="50" r="45" stroke-width="1.5"></circle></g><style>@keyframes spin-logo{to{transform:rotate(360deg)}}</style></svg>`,
-            terminal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6M12 19h8"/></svg>`,
-            shutdown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>`,
-            file: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><polyline points="14,2 14,8 20,8"/></svg>`,
-            monitor: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
-            generic: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg>`
-        };
-        
-        // Add core icons to global registry
-        Object.entries(CORE_ICONS).forEach(([key, svg]) => {
-            TentacleOS.icons.set(key, svg);
+    const APPS = [
+        { id: 'terminal', name: 'Terminal', icon: ICONS.terminal, content: `<div class="terminal-output" id="terminalOutput"></div><div style="display:flex;"><span class="terminal-prompt">operator@tentacle-os:~$</span><input type="text" class="terminal-command" id="terminalInput"></div>`, init: termInit },
+        { id: 'archives', name: 'Secure Archives', icon: ICONS.archives, content: `<div class="terminal-output" id="secureConsoleOutput"></div><div class="terminal-input-line"><input type="password" class="terminal-command" id="secure-console-input" placeholder="ENTER KEYPHRASE..."></div>`, init: secureConsoleInit },
+        { id: 'manual', name: 'Manual Pages', icon: ICONS.manual, content: `<pre>TENTACLEOS(1)         USER COMMANDS         TENTACLEOS(1)
+
+NAME
+        tentacleos - The primary shell of the Omni-Core.
+
+COMMANDS
+        help          Display this message.
+        clear         Clear the terminal screen.
+        neofetch      Display system information.
+        phase [0-3]   Shift reality phase.
+        primarch      Attempt to interface with the Primarch.
+</pre>`},
+        { id: 'gci', name: 'GCI Interface', icon: ICONS.gci, type: 'link', url: 'gci/index.html' },
+        { id: 'primarch', name: 'PRIMARCH Protocol', icon: ICONS.primarch, type: 'action', action: () => { const el = getEl('primarchStatus'); el.textContent = 'PRIMARCH: ACTIVE'; el.classList.add('primarch'); }},
+        { id: 'neofetch', name: 'neofetch', icon: ICONS.neofetch, content: `<div class="neofetch-logo"><pre>
+    ,___,
+    (o,o)
+   /'_'\`
+   \~_~/
+  / \` '\`
+ /  \`   \`
+/    \`   |
+(     \`   \\
+ \     \   \\
+  \     \   \`
+   \_____\_ /
+</pre></div><div class="neofetch-info"><div><span>operator@tentacle-os</span></div><div>--------------</div><div><span>OS:</span> TentacleOS 5.1 Omni-Core</div><div><span>Host:</span> Quantum Mainframe 7</div><div><span>Kernel:</span> 6.6.6-tentacle</div><div><span>Uptime:</span> 42 days, 6 hours, 9 mins</div><div><span>Shell:</span> omni-sh</div><div><span>Resolution:</span> Reality-Scaled</div><div><span>CPU:</span> Quantum Neural Processor</div><div><span>GPU:</span> Manifold Graphics Array</div></div>` },
+        { id: 'shutdown', name: 'Shutdown', icon: ICONS.shutdown, type: 'action', action: shutdownSystem }
+    ];
+
+    let startMenuOpen = false, windowZIndex = 100, currentPhase = 0;
+    const activeWindows = {}, getEl = id => document.getElementById(id);
+    const bootScreen = getEl('bootScreen'), desktopBg = getEl('desktopBg'), desktopIconsContainer = getEl('desktopIcons'), startMenuContent = getEl('startMenuContent'), windowContainer = getEl('windowContainer'), startButton = document.querySelector('.start-button'), startMenu = getEl('startMenu');
+    
+    // --- Canvas Tentacle Animation ---
+    const canvas = getEl('tentacleCanvas');
+    const ctx = canvas.getContext('2d');
+    let tentacles = [];
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    class Tentacle {
+        constructor(x, y) {
+            this.x = x; this.y = y;
+            this.segments = [];
+            this.length = Math.random() * 200 + 100;
+            this.angle = Math.random() * Math.PI * 2;
+            this.speed = Math.random() * 0.5 + 0.2;
+            this.color = Math.random() > 0.5 ? 'rgba(0, 229, 255, 0.4)' : 'rgba(255, 0, 229, 0.4)';
+            this.life = 1;
+            this.decay = 0.002;
+        }
+
+        update() {
+            this.angle += (Math.random() - 0.5) * 0.2;
+            this.x += Math.cos(this.angle) * this.speed;
+            this.y += Math.sin(this.angle) * this.speed;
+
+            if(this.x < 0) this.x = canvas.width; if(this.x > canvas.width) this.x = 0;
+            if(this.y < 0) this.y = canvas.height; if(this.y > canvas.height) this.y = 0;
+            
+            this.segments.unshift({x: this.x, y: this.y});
+            if (this.segments.length > this.length) this.segments.pop();
+
+            this.life -= this.decay;
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.moveTo(this.segments[0].x, this.segments[0].y);
+            for (let i = 1; i < this.segments.length; i++) {
+                ctx.lineTo(this.segments[i].x, this.segments[i].y);
+            }
+            ctx.strokeStyle = this.color.replace('0.4', this.life * 0.4);
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+    }
+
+    function animateTentacles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (tentacles.length < 50 && Math.random() > 0.9) {
+            tentacles.push(new Tentacle(Math.random() * canvas.width, Math.random() * canvas.height));
+        }
+
+        tentacles.forEach((tentacle, index) => {
+            tentacle.update();
+            tentacle.draw();
+            if (tentacle.life <= 0) tentacles.splice(index, 1);
         });
-
-        let startMenuOpen = false, windowZIndex = 100, currentPhase = 0;
-        const activeWindows = {}, getEl = id => document.getElementById(id);
-        const bootScreen = getEl('bootScreen'), desktopBg = getEl('desktopBg'), desktopIconsContainer = getEl('desktopIcons'), startMenuContent = getEl('startMenuContent'), windowContainer = getEl('windowContainer'), startButton = document.querySelector('.start-button'), startMenu = getEl('startMenu');
-        
-        // --- TentacleOS API Functions ---
-        TentacleOS.api.registerApp = function(appConfig) {
-            if (!appConfig.id || !appConfig.name) {
-                console.error('App must have id and name');
-                return false;
+        requestAnimationFrame(animateTentacles);
+    }
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+    
+    // --- Utility Functions ---
+    async function typeWriter(element, text, delay = 50) {
+        return new Promise(resolve => {
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, delay);
+                } else {
+                    resolve();
+                }
             }
-            
-            // Set defaults
-            appConfig.icon = appConfig.icon || TentacleOS.icons.get('generic');
-            appConfig.type = appConfig.type || 'window';
-            
-            TentacleOS.apps.set(appConfig.id, appConfig);
-            console.log(`App registered: ${appConfig.name}`);
-            return true;
+            type();
+        });
+    }
+
+    // --- Phase Shifting ---
+    function setPhase(phaseIndex) {
+        currentPhase = phaseIndex % 4;
+        desktopBg.className = `desktop-bg phase-${currentPhase}`;
+        getEl('phaseStatus').textContent = `PHASE: ${currentPhase}`;
+    }
+    getEl('phaseShifter').addEventListener('click', () => setPhase(currentPhase + 1));
+
+
+    // --- Init & UI Functions ---
+    function initBoot() {
+        getEl('bootLogoSVG').innerHTML = ICONS.logo;
+        document.querySelector('.start-button .start-icon').innerHTML = ICONS.logo;
+        const bootText = getEl('bootText');
+        const progressFill = getEl('progressFill');
+        const bootLines = ["[0.1337] Hive-mind link detected. Status: DORMANT","[0.2451] Reality anchor initializing...","[0.5890] Non-Euclidean geometry drivers... loaded.","[0.7101] WARNING: Memetic hazard detected in boot sector.","[0.8432] Purging cognitive intrusion... OK","[1.2131] Synchronizing with local timeline.","[1.5000] Welcome, Operator. The flesh is a machine."];
+        let lineIndex = 0;
+        
+        const typeBootLines = async () => {
+            for (const line of bootLines) {
+                const color = line.includes('WARNING') ? 'var(--accent-red)' : 'var(--accent-green)';
+                const span = document.createElement('span');
+                span.style.color = color;
+                bootText.appendChild(span);
+                await typeWriter(span, line, 10);
+                bootText.innerHTML += '<br>';
+                bootText.scrollTop = bootText.scrollHeight;
+                lineIndex++;
+                progressFill.style.width = (lineIndex / bootLines.length) * 100 + '%';
+            }
+            setTimeout(() => { bootScreen.style.opacity = '0'; setTimeout(() => { bootScreen.style.display = 'none'; initDesktop(); }, 1500); }, 500);
         };
+        typeBootLines();
+    }
 
-        TentacleOS.api.createWindow = createWindow;
-        TentacleOS.api.closeWindow = closeWindow;
-        TentacleOS.api.launchApp = launchApp;
-        TentacleOS.api.setPhase = setPhase;
-        TentacleOS.api.getIcon = (name) => TentacleOS.icons.get(name);
-        TentacleOS.api.registerIcon = (name, svg) => TentacleOS.icons.set(name, svg);
+    function initDesktop() {
+        APPS.forEach(app => {
+            // Desktop Icon
+            const iconEl = document.createElement('div');
+            iconEl.className = 'desktop-icon';
+            iconEl.innerHTML = `<div class="desktop-icon-image">${app.icon}</div><div class="desktop-icon-label">${app.name}</div>`;
+            iconEl.addEventListener('dblclick', () => launchApp(app.id));
+            desktopIconsContainer.appendChild(iconEl);
 
-        // Utility functions available to apps
-        TentacleOS.utils.typeWriter = typeWriter;
-        TentacleOS.utils.getEl = getEl;
-        TentacleOS.utils.focusWindow = focusWindow;
+            // Start Menu Item
+            const itemEl = document.createElement('div');
+            itemEl.className = 'menu-item';
+            itemEl.innerHTML = `<div class="menu-item-icon">${app.icon}</div><span>${app.name}</span>`;
+            itemEl.onclick = () => launchApp(app.id);
+            startMenuContent.appendChild(itemEl);
+        });
         
-        // --- Canvas Tentacle Animation ---
-        const canvas = getEl('tentacleCanvas');
-        const ctx = canvas.getContext('2d');
-        let tentacles = [];
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        animateTentacles();
+        setInterval(updateSystemInfo, 3000);
+        updateSystemInfo();
+        getEl('systemTime').textContent = new Date().toLocaleTimeString('en-GB');
+        setInterval(() => getEl('systemTime').textContent = new Date().toLocaleTimeString('en-GB'), 1000);
+    }
+    
+    function updateSystemInfo() {
+        getEl('cpuLoad').textContent = `CPU: ${Math.floor(5 + Math.random() * 20)}%`;
+        getEl('memUsage').textContent = `MEM: ${(1.2 + Math.random() * 1.5).toFixed(1)}GB`;
+    }
 
-        class Tentacle {
-            constructor(x, y) {
-                this.x = x; this.y = y;
-                this.segments = [];
-                this.length = Math.random() * 200 + 100;
-                this.angle = Math.random() * Math.PI * 2;
-                this.speed = Math.random() * 0.5 + 0.2;
-                this.color = Math.random() > 0.5 ? 'rgba(0, 229, 255, 0.4)' : 'rgba(255, 0, 229, 0.4)';
-                this.life = 1;
-                this.decay = 0.002;
-            }
-
-            update() {
-                this.angle += (Math.random() - 0.5) * 0.2;
-                this.x += Math.cos(this.angle) * this.speed;
-                this.y += Math.sin(this.angle) * this.speed;
-
-                if(this.x < 0) this.x = canvas.width; if(this.x > canvas.width) this.x = 0;
-                if(this.y < 0) this.y = canvas.height; if(this.y > canvas.height) this.y = 0;
-                
-                this.segments.unshift({x: this.x, y: this.y});
-                if (this.segments.length > this.length) this.segments.pop();
-
-                this.life -= this.decay;
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.moveTo(this.segments[0].x, this.segments[0].y);
-                for (let i = 1; i < this.segments.length; i++) {
-                    ctx.lineTo(this.segments[i].x, this.segments[i].y);
-                }
-                ctx.strokeStyle = this.color.replace('0.4', this.life * 0.4);
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            }
+    // --- Window & App Management ---
+    function launchApp(appId) {
+        if (startMenuOpen) toggleStartMenu(false);
+        const app = APPS.find(a => a.id === appId);
+        if (!app) return;
+        if (app.type === 'action') {
+            if (app.action) app.action();
+        } else if (app.type === 'link') {
+            window.open(app.url, '_blank');
+        } else {
+            createWindow(app);
         }
-
-        function animateTentacles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (tentacles.length < 50 && Math.random() > 0.9) {
-                tentacles.push(new Tentacle(Math.random() * canvas.width, Math.random() * canvas.height));
-            }
-
-            tentacles.forEach((tentacle, index) => {
-                tentacle.update();
-                tentacle.draw();
-                if (tentacle.life <= 0) tentacles.splice(index, 1);
-            });
-            requestAnimationFrame(animateTentacles);
-        }
-        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+    }
+    
+    function createWindow(app) {
+        if (activeWindows[app.id]) { focusWindow(app.id); return; }
+        const win = document.createElement('div');
+        win.id = `${app.id}Window`; win.className = 'window';
+        win.style.left = `${100 + Math.random() * (window.innerWidth - 600)}px`;
+        win.style.top = `${50 + Math.random() * (window.innerHeight - 500)}px`;
+        win.style.zIndex = ++windowZIndex;
+        win.innerHTML = `<div class="window-titlebar"><div><span class="window-titlebar-icon">${app.icon}</span><span>${app.name}</span></div><div class="window-controls"><div class="window-control" data-action="close">×</div></div></div><div class="window-content">${app.content || ''}</div>`;
+        windowContainer.appendChild(win);
+        activeWindows[app.id] = win;
         
-        // --- Window Management ---
-        function createWindow(appId, title, content, width = 600, height = 400) {
-            const windowId = `window-${Date.now()}`;
-            const windowEl = document.createElement('div');
-            windowEl.className = 'window';
-            windowEl.id = windowId;
-            windowEl.style.left = Math.random() * (window.innerWidth - width) + 'px';
-            windowEl.style.top = Math.random() * (window.innerHeight - height - 100) + 50 + 'px';
-            windowEl.style.width = width + 'px';
-            windowEl.style.height = height + 'px';
-            windowEl.style.zIndex = ++windowZIndex;
-
-            const app = TentacleOS.apps.get(appId);
-            const icon = app ? app.icon : TentacleOS.icons.get('generic');
-
-            windowEl.innerHTML = `
-                <div class="window-titlebar">
-                    <div style="display: flex; align-items: center;">
-                        <div class="window-titlebar-icon">${icon}</div>
-                        <span>${title}</span>
-                    </div>
-                    <div class="window-controls">
-                        <div class="window-control" onclick="closeWindow('${windowId}')">×</div>
-                    </div>
-                </div>
-                <div class="window-content">${content}</div>
-            `;
-
-            windowContainer.appendChild(windowEl);
-            activeWindows[windowId] = { appId, element: windowEl };
-
-            // Make draggable
-            makeDraggable(windowEl);
-            focusWindow(windowEl);
-
-            return windowId;
-        }
-
-        function closeWindow(windowId) {
-            const window = activeWindows[windowId];
-            if (window) {
-                window.element.style.animation = 'close-window 0.3s ease-in-out forwards';
-                setTimeout(() => {
-                    window.element.remove();
-                    delete activeWindows[windowId];
-                }, 300);
-            }
-        }
-
-        function focusWindow(windowEl) {
-            windowEl.style.zIndex = ++windowZIndex;
-        }
-
-        function makeDraggable(windowEl) {
-            const titlebar = windowEl.querySelector('.window-titlebar');
-            let isDragging = false, startX, startY, startLeft, startTop;
-
-            titlebar.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                startLeft = parseInt(windowEl.style.left) || 0;
-                startTop = parseInt(windowEl.style.top) || 0;
-                focusWindow(windowEl);
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                const newLeft = startLeft + e.clientX - startX;
-                const newTop = startTop + e.clientY - startY;
-                windowEl.style.left = Math.max(0, Math.min(newLeft, window.innerWidth - windowEl.offsetWidth)) + 'px';
-                windowEl.style.top = Math.max(0, Math.min(newTop, window.innerHeight - windowEl.offsetHeight)) + 'px';
-            });
-
-            document.addEventListener('mouseup', () => { isDragging = false; });
-        }
-
-        // --- App Loading & Launching ---
-        function launchApp(appId) {
-            const app = TentacleOS.apps.get(appId);
-            if (!app) {
-                console.error(`App not found: ${appId}`);
-                return;
-            }
-
-            if (app.type === 'action') {
-                app.action();
-                return;
-            }
-
-            const windowId = createWindow(appId, app.name, app.content || `<h2>${app.name}</h2><p>This app is running...</p>`);
-            
-            // Initialize app if it has an init function
-            if (app.init) {
-                setTimeout(() => app.init(windowId), 100);
-            }
-        }
-
-        // --- Terminal Implementation ---
-        function termInit(windowId) {
-            const termOutput = document.getElementById('terminalOutput');
-            const termInput = document.getElementById('terminalInput');
-            
-            if (!termOutput || !termInput) return;
-
-            const commands = {
-                help: () => 'Available commands: help, clear, neofetch, ls, whoami, date, echo [text], phase [0-3]',
-                clear: () => { termOutput.innerHTML = ''; return ''; },
-                neofetch: () => `
-<div class="neofetch-logo">      ████████
-    ██        ██
-  ██    ████    ██
-██    ██    ██    ██
-██  ██        ██  ██
-██  ██  ████  ██  ██
-██    ██    ██    ██
-  ██    ████    ██
-    ██        ██
-      ████████</div>
-<div class="neofetch-info">
-<span>OS:</span> TentacleOS v5.1 OMNI-CORE
-<span>Kernel:</span> Hive-Mind 3.14.159
-<span>Shell:</span> tentacle-sh
-<span>Uptime:</span> ${Math.floor(Date.now() / 1000 / 60)} minutes
-<span>Memory:</span> 8.0 GB / 16.0 GB
-<span>Phase:</span> ${currentPhase}
-<span>Status:</span> OPERATIONAL
-</div>`,
-                ls: () => 'drwxr-xr-x  2 operator hive    4096 Aug 13 12:34 Documents\ndrwxr-xr-x  2 operator hive    4096 Aug 13 12:34 Downloads\n-rw-r--r--  1 operator hive    1337 Aug 13 12:34 README.txt\n-rwxr-xr-x  1 operator hive    2048 Aug 13 12:34 hive_connect.sh',
-                whoami: () => 'operator',
-                date: () => new Date().toString(),
-                echo: (args) => args.join(' '),
-                phase: (args) => {
-                    const phase = parseInt(args[0]);
-                    if (isNaN(phase) || phase < 0 || phase > 3) {
-                        return 'Usage: phase [0-3]';
-                    }
-                    setPhase(phase);
-                    return `Phase shifted to ${phase}`;
-                }
-            };
-
-            function executeCommand(input) {
-                const [cmd, ...args] = input.trim().split(' ');
-                const command = commands[cmd.toLowerCase()];
-                
-                if (command) {
-                    return command(args);
-                } else if (cmd) {
-                    return `Command not found: ${cmd}. Type 'help' for available commands.`;
-                }
-                return '';
-            }
-
-            termInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    const input = termInput.value;
-                    const output = executeCommand(input);
-                    
-                    termOutput.innerHTML += `<div><span class="terminal-prompt">operator@tentacle-os:~$</span> ${input}</div>`;
-                    if (output) {
-                        termOutput.innerHTML += `<div>${output}</div>`;
-                    }
-                    
-                    termInput.value = '';
-                    termOutput.scrollTop = termOutput.scrollHeight;
-                }
-            });
-
-            // Welcome message
-            termOutput.innerHTML = '<div style="color: var(--accent-cyan);">Welcome to TentacleOS Terminal v5.1</div><div>Type "help" for available commands.</div>';
-        }
-
-        // --- Phase Shifting ---
-        function setPhase(phaseIndex) {
-            currentPhase = phaseIndex % 4;
-            desktopBg.className = `desktop-bg phase-${currentPhase}`;
-            getEl('phaseStatus').textContent = `PHASE: ${currentPhase}`;
-            
-            // Update system status based on phase
-            const primarchEl = getEl('primarchStatus');
-            switch(currentPhase) {
-                case 0:
-                    primarchEl.textContent = 'PRIMARCH: DORMANT';
-                    primarchEl.className = '';
-                    break;
-                case 1:
-                    primarchEl.textContent = 'PRIMARCH: STIRRING';
-                    primarchEl.className = 'primarch';
-                    break;
-                case 2:
-                    primarchEl.textContent = 'PRIMARCH: AWAKENING';
-                    primarchEl.className = 'primarch';
-                    break;
-                case 3:
-                    primarchEl.textContent = 'PRIMARCH: ASCENDED';
-                    primarchEl.className = 'primarch';
-                    break;
-            }
-        }
-
-        // --- System Functions ---
-        function shutdownSystem() {
-            const shutdownScreen = document.createElement('div');
-            shutdownScreen.style.cssText = `
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: var(--bg-deep); z-index: 20000; display: flex;
-                flex-direction: column; justify-content: center; align-items: center;
-                color: var(--accent-red); font-family: var(--font-display);
-                font-size: 24px; text-align: center;
-            `;
-            shutdownScreen.innerHTML = `
-                <div style="margin-bottom: 20px;">${TentacleOS.icons.get('shutdown')}</div>
-                <div>SYSTEM SHUTDOWN INITIATED</div>
-                <div style="font-size: 14px; margin-top: 10px; color: var(--text-secondary);">
-                    The flesh weakens, but the machine endures...
-                </div>
-            `;
-            document.body.appendChild(shutdownScreen);
-            
+        win.querySelector('.window-titlebar').addEventListener('mousedown', e => onDragStart(e, win));
+        win.addEventListener('mousedown', () => focusWindow(app.id));
+        win.querySelector('.window-control[data-action="close"]').onclick = () => closeWindow(app.id);
+        
+        if (app.init) app.init(win);
+    }
+    
+    function closeWindow(appId) {
+        const win = activeWindows[appId];
+        if (win) {
+            win.style.animation = 'close-window 0.3s forwards';
             setTimeout(() => {
-                window.location.reload();
-            }, 3000);
+                win.remove();
+                delete activeWindows[appId];
+            }, 300);
         }
+    }
+    
+    function focusWindow(appId) { if (activeWindows[appId]) activeWindows[appId].style.zIndex = ++windowZIndex; }
+    
+    function onDragStart(e, win) {
+        if (e.target.closest('.window-control')) return;
+        focusWindow(win.id.replace('Window', ''));
+        const offsetX = e.clientX - win.offsetLeft;
+        const offsetY = e.clientY - win.offsetTop;
+        const onDrag = (moveEvent) => {
+            win.style.left = `${moveEvent.clientX - offsetX}px`;
+            win.style.top = `${moveEvent.clientY - offsetY}px`;
+        };
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', () => document.removeEventListener('mousemove', onDrag), { once: true });
+    }
+    
+    function shutdownSystem(){
+        bootScreen.innerHTML = `<div class="boot-logo" style="color:var(--accent-red);">${ICONS.shutdown}</div><div style="font-size:24px; color:var(--accent-red);">CONNECTION SEVERED</div>`;
+        bootScreen.style.opacity='1';
+        bootScreen.style.display='flex';
+        setTimeout(() => document.body.innerHTML = '', 2000);
+    }
+    
+    // --- App Init Functions ---
+    async function termInit(win) {
+        const input = win.querySelector('#terminalInput'), output = win.querySelector('#terminalOutput');
+        input.focus();
+        await typeWriter(output, 'TentacleOS [Version 5.1]\nType "help" for a list of commands.\n\n', 20);
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && input.value) {
+                const userInput = input.value.trim();
+                const [cmd, arg] = userInput.toLowerCase().split(' ');
+                output.innerHTML += `<div class="input"><span style="color:var(--accent-cyan)">operator@tentacle-os:~$</span> ${userInput}</div>`;
+                input.value = '';
 
-        function updateSystemInfo() {
-            const cpuUsage = Math.random() * 30 + 10;
-            const memUsage = Math.random() * 4 + 2;
-            
-            getEl('cpuLoad').textContent = `CPU: ${cpuUsage.toFixed(1)}%`;
-            getEl('memUsage').textContent = `MEM: ${memUsage.toFixed(2)}GB`;
-        }
-
-        // --- Desktop & UI Building ---
-        function buildDesktop() {
-            // Clear existing icons and menu items
-            desktopIconsContainer.innerHTML = '';
-            startMenuContent.innerHTML = '';
-
-            // Build from registered apps
-            TentacleOS.apps.forEach((app, appId) => {
-                // Desktop Icon
-                const iconEl = document.createElement('div');
-                iconEl.className = 'desktop-icon';
-                iconEl.innerHTML = `<div class="desktop-icon-image">${app.icon}</div><div class="desktop-icon-label">${app.name}</div>`;
-                iconEl.addEventListener('dblclick', () => launchApp(appId));
-                desktopIconsContainer.appendChild(iconEl);
-
-                // Start Menu Item
-                const itemEl = document.createElement('div');
-                itemEl.className = 'menu-item';
-                itemEl.innerHTML = `<div class="menu-item-icon">${app.icon}</div><span>${app.name}</span>`;
-                itemEl.onclick = () => {
-                    launchApp(appId);
-                    toggleStartMenu();
-                };
-                startMenuContent.appendChild(itemEl);
-            });
-        }
-
-        function toggleStartMenu() {
-            startMenuOpen = !startMenuOpen;
-            startMenu.classList.toggle('active', startMenuOpen);
-            startButton.classList.toggle('active', startMenuOpen);
-        }
-
-        // --- Utility Functions ---
-        async function typeWriter(element, text, delay = 50) {
-            return new Promise(resolve => {
-                let i = 0;
-                function type() {
-                    if (i < text.length) {
-                        element.innerHTML += text.charAt(i);
-                        i++;
-                        setTimeout(type, delay);
-                    } else {
-                        resolve();
-                    }
-                }
-                type();
-            });
-        }
-
-        // --- Event Listeners ---
-        startButton.addEventListener('click', toggleStartMenu);
-        getEl('phaseShifter').addEventListener('click', () => setPhase(currentPhase + 1));
-        
-        // Close start menu when clicking elsewhere
-        document.addEventListener('click', (e) => {
-            if (!startButton.contains(e.target) && !startMenu.contains(e.target) && startMenuOpen) {
-                toggleStartMenu();
+                let response = `<div style="color:var(--accent-red)">command not found: ${cmd}</div>`;
+                if (cmd === 'help') response = `<div>Commands: help, clear, neofetch, phase [0-3], primarch</div>`;
+                if (cmd === 'clear') { output.innerHTML = ''; return; }
+                if (cmd === 'neofetch') { launchApp('neofetch'); response = ''; }
+                if (cmd === 'phase' && arg && !isNaN(arg)) { setPhase(parseInt(arg)); response = `<div>Reality phase shifted to ${currentPhase}</div>`; }
+                if (cmd === 'primarch') { launchApp('primarch'); response = `<div>Interfacing with the Primarch...</div>`; }
+                
+                output.innerHTML += response;
+                output.scrollTop = output.scrollHeight;
             }
         });
+    }
 
-        // --- App Loading System ---
-        async function loadApps() {
-            const loadingEl = document.createElement('div');
-            loadingEl.className = 'app-loading';
-            loadingEl.textContent = 'Loading applications...';
-            document.body.appendChild(loadingEl);
-
-            // Register core system apps
-            TentacleOS.api.registerApp({
-                id: 'terminal',
-                name: 'Terminal',
-                icon: TentacleOS.icons.get('terminal'),
-                content: `<div class="terminal-output" id="terminalOutput"></div><div style="display:flex;"><span class="terminal-prompt">operator@tentacle-os:~$</span><input type="text" class="terminal-command" id="terminalInput"></div>`,
-                init: termInit
-            });
-
-            TentacleOS.api.registerApp({
-                id: 'file-manager',
-                name: 'File Manager',
-                icon: TentacleOS.icons.get('file'),
-                content: `
-                    <h3>TentacleOS File System</h3>
-                    <div style="font-family: monospace; margin-top: 15px;">
-                        <div style="margin: 5px 0; cursor: pointer; padding: 5px; border-radius: 3px;" 
-                             onmouseover="this.style.background='var(--border-color)'" 
-                             onmouseout="this.style.background='transparent'">
-                            📁 Documents/
-                        </div>
-                        <div style="margin: 5px 0; cursor: pointer; padding: 5px; border-radius: 3px;" 
-                             onmouseover="this.style.background='var(--border-color)'" 
-                             onmouseout="this.style.background='transparent'">
-                            📁 Downloads/
-                        </div>
-                        <div style="margin: 5px 0; cursor: pointer; padding: 5px; border-radius: 3px;" 
-                             onmouseover="this.style.background='var(--border-color)'" 
-                             onmouseout="this.style.background='transparent'">
-                            📄 README.txt
-                        </div>
-                        <div style="margin: 5px 0; cursor: pointer; padding: 5px; border-radius: 3px;" 
-                             onmouseover="this.style.background='var(--border-color)'" 
-                             onmouseout="this.style.background='transparent'">
-                            ⚡ hive_connect.sh
-                        </div>
-                    </div>
-                `
-            });
-
-            TentacleOS.api.registerApp({
-                id: 'system-monitor',
-                name: 'System Monitor',
-                icon: TentacleOS.icons.get('monitor'),
-                content: `
-                    <h3>TentacleOS System Monitor</h3>
-                    <div style="margin-top: 15px; font-family: monospace;">
-                        <div style="margin: 10px 0;">
-                            <strong>CPU Usage:</strong> <span id="sysmon-cpu">--</span>
-                        </div>
-                        <div style="margin: 10px 0;">
-                            <strong>Memory Usage:</strong> <span id="sysmon-mem">--</span>
-                        </div>
-                        <div style="margin: 10px 0;">
-                            <strong>Active Phase:</strong> <span id="sysmon-phase">--</span>
-                        </div>
-                        <div style="margin: 10px 0;">
-                            <strong>Primarch Status:</strong> <span id="sysmon-primarch">--</span>
-                        </div>
-                        <div style="margin: 10px 0;">
-                            <strong>Active Windows:</strong> <span id="sysmon-windows">--</span>
-                        </div>
-                    </div>
-                `,
-                init: (windowId) => {
-                    const updateSysmon = () => {
-                        const sysmonCpu = document.getElementById('sysmon-cpu');
-                        const sysmonMem = document.getElementById('sysmon-mem');
-                        const sysmonPhase = document.getElementById('sysmon-phase');
-                        const sysmonPrimarch = document.getElementById('sysmon-primarch');
-                        const sysmonWindows = document.getElementById('sysmon-windows');
-                        
-                        if (sysmonCpu) sysmonCpu.textContent = getEl('cpuLoad').textContent.split(': ')[1];
-                        if (sysmonMem) sysmonMem.textContent = getEl('memUsage').textContent.split(': ')[1];
-                        if (sysmonPhase) sysmonPhase.textContent = currentPhase;
-                        if (sysmonPrimarch) sysmonPrimarch.textContent = getEl('primarchStatus').textContent.split(': ')[1];
-                        if (sysmonWindows) sysmonWindows.textContent = Object.keys(activeWindows).length;
-                    };
-                    
-                    updateSysmon();
-                    const interval = setInterval(updateSysmon, 1000);
-                    
-                    // Clean up interval when window closes
-                    const observer = new MutationObserver((mutations) => {
-                        mutations.forEach((mutation) => {
-                            if (mutation.type === 'childList' && !document.getElementById(windowId)) {
-                                clearInterval(interval);
-                                observer.disconnect();
-                            }
-                        });
-                    });
-                    observer.observe(document.body, { childList: true, subtree: true });
+    async function secureConsoleInit(win) {
+        const input = win.querySelector('#secure-console-input'), output = win.querySelector('#secureConsoleOutput');
+        input.focus();
+        await typeWriter(output, 'SECURE ARCHIVAL NODE :: AUTHORIZATION REQUIRED\n\n', 20);
+        
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && input.value) {
+                const key = input.value.trim().toUpperCase();
+                input.value = '';
+                if (passwordVault[key]) {
+                    output.innerHTML += `> KEY ACCEPTED.\n<span style="color:var(--accent-green)">DECRYPTING... OPENING FILE...</span>\n\n`;
+                    setTimeout(() => window.open(passwordVault[key], '_blank'), 1000);
+                } else {
+                    output.innerHTML += `> KEY REJECTED.\n<span style="color:var(--accent-red)">ACCESS DENIED.</span>\n\n`;
                 }
-            });
+                output.scrollTop = output.scrollHeight;
+            }
+        });
+    }
+    
+    function toggleStartMenu(state){
+        startMenuOpen = state !== undefined ? state : !startMenuOpen;
+        startMenu.classList.toggle('active', startMenuOpen);
+        startButton.classList.toggle('active', startMenuOpen);
+    }
+    startButton.addEventListener('click', e => { e.stopPropagation(); toggleStartMenu(); });
+    document.addEventListener('click', () => { if (startMenuOpen) toggleStartMenu(false); });
 
-            TentacleOS.api.registerApp({
-                id: 'shutdown',
-                name: 'Shutdown',
-                icon: TentacleOS.icons.get('shutdown'),
-                type: 'action',
-                action: shutdownSystem
-            });
-
-            setTimeout(() => {
-                loadingEl.remove();
-                buildDesktop();
-            }, 1000);
-        }
-
-        // --- Boot Sequence ---
-        function initBoot() {
-            getEl('bootLogoSVG').innerHTML = TentacleOS.icons.get('logo');
-            document.querySelector('.start-button .start-icon').innerHTML = TentacleOS.icons.get('logo');
-            const bootText = getEl('bootText');
-            const progressFill = getEl('progressFill');
-            const bootLines = [
-                "[0.1337] Hive-mind link detected. Status: DORMANT",
-                "[0.2451] Reality anchor initializing...",
-                "[0.5890] Non-Euclidean geometry drivers... loaded.",
-                "[0.7101] WARNING: Memetic hazard detected in boot sector.",
-                "[0.8432] Purging cognitive intrusion... OK",
-                "[1.2131] Synchronizing with local timeline.",
-                "[1.5000] Loading applications...",
-                "[1.8000] Welcome, Operator. The flesh is a machine."
-            ];
-            
-            const typeBootLines = async () => {
-                for (let i = 0; i < bootLines.length; i++) {
-                    const line = bootLines[i];
-                    const color = line.includes('WARNING') ? 'var(--accent-red)' : 'var(--accent-green)';
-                    const span = document.createElement('span');
-                    span.style.color = color;
-                    bootText.appendChild(span);
-                    await typeWriter(span, line, 10);
-                    bootText.innerHTML += '<br>';
-                    bootText.scrollTop = bootText.scrollHeight;
-                    progressFill.style.width = ((i + 1) / bootLines.length) * 100 + '%';
-                }
-                setTimeout(() => { 
-                    bootScreen.style.opacity = '0'; 
-                    setTimeout(() => { 
-                        bootScreen.style.display = 'none'; 
-                        initDesktop(); 
-                    }, 1500); 
-                }, 500);
-            };
-            typeBootLines();
-        }
-
-        function initDesktop() {
-            animateTentacles();
-            setInterval(updateSystemInfo, 3000);
-            updateSystemInfo();
-            getEl('systemTime').textContent = new Date().toLocaleTimeString('en-GB');
-            setInterval(() => getEl('systemTime').textContent = new Date().toLocaleTimeString('en-GB'), 1000);
-            loadApps();
-        }
-
-        // Start the system
-        initBoot();
-    });
-    </script>
+    initBoot();
+});
+</script>
 </body>
 </html>
