@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TentacleOS v5.0 // OMNI-CORE</title>
+    <title>TentacleOS v5.1 // OMNI-CORE</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap');
 
@@ -11,9 +11,9 @@
             --bg-deep: #0a0014;
             --bg-medium: #1a0f2a;
             --border-color: #3a2f4a;
-            --window-bg: rgba(26, 15, 42, 0.85);
-            --text-primary: #d0c8e0;
-            --text-secondary: #8c82a0;
+            --window-bg: rgba(20, 10, 35, 0.8);
+            --text-primary: #e0d8f0;
+            --text-secondary: #9c92b0;
             --accent-cyan: #00e5ff;
             --accent-magenta: #ff00e5;
             --accent-green: #39ff14;
@@ -25,75 +25,129 @@
 
         /* --- Base & Overlays --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: var(--font-main); background: var(--bg-deep); color: var(--text-primary); overflow: hidden; height: 100vh; cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%2300e5ff" stroke-width="1.5"><path d="M12 2L12 22 M2 12L22 12 M5 5L19 19 M5 19L19 5"/></svg>'), auto; }
-        .crt-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; animation: flicker 0.15s infinite; }
-        @keyframes flicker { 0% { opacity: 1; } 50% { opacity: 0.95; } 100% { opacity: 1; } }
+        
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 256 256"><path fill="%2300e5ff" d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24m0 192a88 88 0 1 1 88-88a88.1 88.1 0 0 1-88 88m48-88a48 48 0 1 1-56.49-47.16a8 8 0 0 1 15 5.32A32 32 0 1 0 160 120a8 8 0 0 1-8 8Z" transform="rotate(45 128 128) scale(0.8)"/></svg>') 16 16, auto;
+        }
+
+        #tentacleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+        
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.2) 0px, rgba(0,0,0,0.2) 1px, transparent 1px, transparent 3px);
+            animation: flicker 0.1s infinite;
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 0.85; }
+        }
 
         /* --- Animated Backgrounds & Phases --- */
-        .desktop-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-color: var(--bg-deep); transition: all 1.5s ease-in-out; }
-        .desktop-bg.phase-0 { background-image: radial-gradient(circle at 15% 15%, rgba(0, 229, 255, 0.1), transparent 30%), radial-gradient(circle at 85% 75%, rgba(255, 0, 229, 0.1), transparent 30%); animation: pulse-bg 15s ease-in-out infinite alternate; }
+        .desktop-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background-color: transparent; /* Let canvas show through */
+            transition: all 1.5s ease-in-out;
+            opacity: 0.5;
+        }
+        .desktop-bg.phase-0 { background-image: radial-gradient(circle at 15% 15%, rgba(0, 229, 255, 0.2), transparent 40%), radial-gradient(circle at 85% 75%, rgba(255, 0, 229, 0.2), transparent 40%); }
         .desktop-bg.phase-1 { background: linear-gradient(45deg, #1a0000, #330000, #1a001a, #000000); animation: glitch-shift 0.5s infinite; }
         .desktop-bg.phase-2 { background-image: repeating-linear-gradient(90deg, #d4c4a0 0, #d4c4a0 1px, transparent 1px, transparent 50px), repeating-linear-gradient(0deg, #d4c4a0 0, #d4c4a0 1px, transparent 1px, transparent 50px), linear-gradient(#e9dcc9, #a0826d); animation: corridor-shift 80s linear infinite; }
-        .desktop-bg.phase-3 { background: #000; }
-        @keyframes pulse-bg { from { background-color: var(--bg-deep); } to { background-color: #05000a; } }
+        .desktop-bg.phase-3 { background: #000; opacity: 0.8; }
         @keyframes glitch-shift { 0%{transform:translate(0,0)} 25%{transform:translate(2px,-2px)} 50%{transform:translate(-2px,2px)} 75%{transform:translate(2px,2px)} 100%{transform:translate(0,0)} }
         @keyframes corridor-shift { from { background-position: 0 0; } to { background-position: 1000px 500px; } }
 
         /* --- Boot Screen --- */
-        .boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-deep); z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--accent-green); font-family: var(--font-display); transition: opacity 1s ease; }
-        .boot-logo { width: 80px; height: 80px; margin-bottom: 20px; color: var(--accent-cyan); animation: boot-flicker 3s infinite; }
-        @keyframes boot-flicker { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px var(--accent-cyan)); } 50% { opacity: 0.8; filter: drop-shadow(0 0 15px var(--accent-cyan)); } }
+        .boot-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-deep); z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--accent-green); font-family: var(--font-display); transition: opacity 1.5s ease; }
+        .boot-logo { width: 100px; height: 100px; margin-bottom: 20px; color: var(--accent-cyan); animation: boot-pulse 4s ease-in-out infinite; }
+        @keyframes boot-pulse { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px var(--accent-cyan)); transform: scale(1); } 50% { opacity: 0.8; filter: drop-shadow(0 0 20px var(--accent-cyan)); transform: scale(1.05); } }
         .boot-text { font-family: var(--font-main); text-align: left; line-height: 1.8; font-size: 14px; max-width: 600px; height: 250px; overflow: hidden; }
-        .progress-bar { width: 500px; height: 4px; background: var(--border-color); margin-top: 20px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta)); width: 0%; transition: width 0.2s ease; }
+        .progress-bar { width: 500px; height: 4px; background: var(--border-color); margin-top: 20px; border-radius: 2px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta)); width: 0%; transition: width 0.2s ease; border-radius: 2px; }
         
         /* --- Taskbar --- */
-        .taskbar { position: fixed; bottom: 0; left: 0; width: 100%; height: 44px; z-index: 1000; background: var(--window-bg); backdrop-filter: blur(10px); border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; }
+        .taskbar { position: fixed; bottom: 0; left: 0; width: 100%; height: 44px; z-index: 1000; background: var(--window-bg); backdrop-filter: blur(12px); border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; box-shadow: 0 -5px 25px rgba(0,0,0,0.5); }
         .start-button { display: flex; align-items: center; gap: 10px; padding: 0 15px; height: 100%; cursor: pointer; font-weight: bold; font-size: 14px; color: var(--text-primary); transition: all 0.2s ease; }
-        .start-button:hover, .start-button.active { background: var(--border-color); color: var(--accent-cyan); }
-        .start-icon { width: 22px; height: 22px; }
+        .start-button:hover, .start-button.active { background: var(--border-color); color: var(--accent-cyan); text-shadow: 0 0 5px var(--accent-cyan); }
+        .start-icon { width: 24px; height: 24px; transition: transform 0.3s ease; }
+        .start-button:hover .start-icon { transform: rotate(360deg); }
         .system-info { display: flex; align-items: center; gap: 20px; font-size: 12px; color: var(--text-secondary); flex-grow: 1; padding-left: 20px; }
-        .system-info span.primarch { color: var(--primarch-gold); font-weight: bold; }
-        .phase-shifter { background: var(--border-color); color: var(--accent-cyan); border: 1px solid var(--border-color); padding: 5px 10px; font-size: 12px; cursor: pointer; transition: all 0.2s ease; margin-left: auto; }
-        .phase-shifter:hover { background: var(--accent-cyan); color: var(--bg-deep); }
-        .system-time { font-family: var(--font-display); font-size: 18px; color: var(--accent-green); padding-left: 20px; }
+        .system-info span.primarch { color: var(--primarch-gold); font-weight: bold; animation: pulse-gold 2s infinite; }
+        @keyframes pulse-gold { 0%, 100% { text-shadow: 0 0 3px var(--primarch-gold); } 50% { text-shadow: 0 0 10px var(--primarch-gold); } }
+        .phase-shifter { background: var(--border-color); color: var(--accent-cyan); border: 1px solid var(--border-color); padding: 5px 10px; font-size: 12px; cursor: pointer; transition: all 0.2s ease; margin-left: auto; border-radius: 3px; }
+        .phase-shifter:hover { background: var(--accent-cyan); color: var(--bg-deep); box-shadow: 0 0 10px var(--accent-cyan); }
+        .system-time { font-family: var(--font-display); font-size: 18px; color: var(--accent-green); padding-left: 20px; text-shadow: 0 0 5px var(--accent-green); }
 
         /* --- UI Elements --- */
-        .start-menu { position: fixed; bottom: 45px; left: 0; width: 350px; background: var(--window-bg); backdrop-filter: blur(15px); border: 1px solid var(--border-color); border-radius: 4px; box-shadow: 0 0 40px rgba(0, 0, 0, 0.7); z-index: 1001; transform: scale(0.95) translateY(10px); transform-origin: bottom left; opacity: 0; transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28); pointer-events: none; }
-        .start-menu.active { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
-        .start-menu-header { padding: 12px 15px; font-weight: bold; border-bottom: 1px solid var(--border-color); font-family: var(--font-display); font-size: 18px; color: var(--accent-cyan); }
-        .menu-item { display: flex; align-items: center; gap: 12px; padding: 10px 20px; cursor: pointer; transition: all 0.2s ease; font-size: 14px; }
-        .menu-item:hover { background: var(--border-color); color: var(--accent-cyan); }
+        .start-menu { position: fixed; bottom: 45px; left: 10px; width: 350px; background: var(--window-bg); backdrop-filter: blur(15px); border: 1px solid var(--border-color); border-radius: 4px; box-shadow: 0 0 40px rgba(0, 0, 0, 0.7); z-index: 1001; transform: scaleY(0) translateY(20px); transform-origin: bottom left; opacity: 0; transition: all 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28); pointer-events: none; }
+        .start-menu.active { transform: scaleY(1) translateY(0); opacity: 1; pointer-events: all; }
+        .start-menu-header { padding: 12px 15px; border-bottom: 1px solid var(--border-color); font-family: var(--font-display); font-size: 20px; color: var(--accent-cyan); text-shadow: 0 0 5px var(--accent-cyan); }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; cursor: pointer; transition: all 0.2s ease; font-size: 14px; }
+        .menu-item:hover { background: var(--border-color); color: var(--accent-cyan); transform: translateX(5px); }
         .menu-item-icon { width: 20px; height: 20px; color: var(--accent-cyan); }
+        
         .desktop-icons { position: absolute; top: 20px; left: 20px; display: grid; grid-template-columns: repeat(auto-fill, 90px); gap: 20px; }
         .desktop-icon { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; cursor: pointer; transition: all 0.2s; border-radius: 4px; text-align: center; }
-        .desktop-icon:hover { background: rgba(0, 229, 255, 0.1); }
-        .desktop-icon-image { width: 48px; height: 48px; color: var(--accent-cyan); }
+        .desktop-icon:hover { background: rgba(0, 229, 255, 0.15); }
+        .desktop-icon-image { width: 48px; height: 48px; color: var(--accent-cyan); filter: drop-shadow(0 0 5px rgba(0, 229, 255, 0.5)); transition: transform 0.2s ease; }
+        .desktop-icon:hover .desktop-icon-image { transform: scale(1.1); }
         .desktop-icon-label { font-size: 12px; color: var(--text-primary); text-shadow: 1px 1px 3px var(--bg-deep); }
-        .window { position: absolute; min-width: 450px; min-height: 350px; background: var(--window-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color); border-radius: 4px; box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8); display: none; z-index: 100; resize: both; overflow: hidden; font-family: var(--font-main); display: flex; flex-direction: column; animation: open-window 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-        @keyframes open-window { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .window-titlebar { background: var(--bg-medium); color: var(--text-primary); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; cursor: move; user-select: none; font-size: 14px; font-weight: bold; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+        
+        .window { position: absolute; min-width: 450px; min-height: 350px; background: var(--window-bg); backdrop-filter: blur(12px); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8); display: flex; flex-direction: column; z-index: 100; resize: both; overflow: hidden; animation: open-window 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        @keyframes open-window { from { opacity: 0; transform: scale(0.9) skew(-5deg); } to { opacity: 1; transform: scale(1) skew(0deg); } }
+        @keyframes close-window { to { opacity: 0; transform: scale(0.9) skew(5deg); } }
+        
+        .window-titlebar { background: var(--bg-medium); color: var(--text-primary); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; cursor: move; user-select: none; font-size: 14px; font-weight: bold; border-bottom: 1px solid var(--border-color); flex-shrink: 0; text-shadow: 0 0 5px var(--accent-cyan); }
         .window-titlebar-icon { width: 16px; height: 16px; margin-right: 8px; color: var(--accent-cyan); }
         .window-controls { display: flex; gap: 5px; }
-        .window-control { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: var(--border-color); color: var(--text-primary); cursor: pointer; font-size: 14px; transition: all 0.2s ease; }
-        .window-control:hover { background: var(--accent-red); color: var(--bg-deep); }
+        .window-control { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: var(--border-color); color: var(--text-primary); cursor: pointer; font-size: 14px; transition: all 0.2s ease; border-radius: 3px;}
+        .window-control:hover { background: var(--accent-red); color: var(--bg-deep); transform: scale(1.1); }
         .window-content { padding: 15px; overflow: auto; flex-grow: 1; line-height: 1.7; }
+        
+        /* Terminal Specific */
         .terminal-output { flex: 1; overflow-y: auto; margin-bottom: 10px; color: var(--accent-green); font-size: 14px; font-family: var(--font-display); }
         .terminal-prompt { color: var(--accent-cyan); margin-right: 8px; }
-        .terminal-command { flex: 1; background: transparent; border: none; color: var(--accent-green); font-family: var(--font-display); font-size: 14px; outline: none; caret-color: var(--accent-green); }
+        .terminal-command { flex: 1; background: transparent; border: none; color: var(--accent-green); font-family: var(--font-display); font-size: 14px; outline: none; caret-color: var(--accent-green); width: calc(100% - 150px); }
         
         pre { white-space: pre-wrap; word-wrap: break-word; font-family: inherit;}
-        .neofetch-logo { color: var(--accent-cyan); float: left; margin-right: 20px; font-size: 1.1em; }
+        .neofetch-logo { color: var(--accent-cyan); float: left; margin-right: 20px; font-size: 1.1em; text-shadow: 0 0 8px var(--accent-cyan); }
         .neofetch-info span { color: var(--accent-cyan); }
     </style>
 </head>
 <body>
-    <div class="boot-screen" id="bootScreen"><div class="boot-logo" id="bootLogoSVG"></div><div class="boot-text" id="bootText"></div><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div></div>
+    <div class="boot-screen" id="bootScreen">
+        <div class="boot-logo" id="bootLogoSVG"></div>
+        <div class="boot-text" id="bootText"></div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    
+    <canvas id="tentacleCanvas"></canvas>
     <div class="desktop-bg phase-0" id="desktopBg"></div>
     <div class="crt-overlay"></div>
+
     <div class="desktop-icons" id="desktopIcons"></div>
+
     <div class="taskbar">
-        <div class="start-button"><div class="start-icon"></div><span>Tentacle OS</span></div>
+        <div class="start-button"><div class="start-icon"></div><span>TentacleOS</span></div>
         <div class="system-info">
             <span id="cpuLoad">CPU: --%</span>
             <span id="memUsage">MEM: -.--GB</span>
@@ -103,57 +157,66 @@
         <button class="phase-shifter" id="phaseShifter">SHIFT PHASE</button>
         <div class="system-time" id="systemTime">--:--:--</div>
     </div>
-    <div class="start-menu" id="startMenu"><div class="start-menu-header">TentacleOS v5.0</div><div class="start-menu-content" id="startMenuContent"></div></div>
+
+    <div class="start-menu" id="startMenu">
+        <div class="start-menu-header">TentacleOS v5.1</div>
+        <div class="start-menu-content" id="startMenuContent"></div>
+    </div>
+
     <div id="windowContainer"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
     const ICONS = {
-        logo: `<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M50,20 C35,20 25,30 25,45 C25,65 40,75 50,80 M50,20 C65,20 75,30 75,45 C75,65 60,75 50,80 M50,55 C40,60 35,70 35,80 M50,55 C60,60 65,70 65,80"/><circle cx="50" cy="50" r="45" stroke-width="4"/><circle cx="50" cy="50" r="10" fill="currentColor"/></svg>`,
+        logo: `<svg viewBox="0 0 100 100"><g style="transform-origin:center;animation:spin-logo 30s linear infinite" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" fill="none" stroke="currentColor"><path d="M50 30 C 20 40, 20 70, 50 80 S 80 60, 50 50 S 20 40, 50 30"></path><path d="M50 30 C 80 40, 80 70, 50 80 S 20 60, 50 50 S 80 40, 50 30"></path><path d="M50 30 C 40 10, 60 10, 50 30"></path><path d="M50 80 C 40 100, 60 100, 50 80"></path><circle cx="50" cy="50" r="12" fill="currentColor"></circle><circle cx="50" cy="50" r="45" stroke-width="1.5"></circle></g><style>@keyframes spin-logo{to{transform:rotate(360deg)}}</style></svg>`,
         terminal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6-6-6M12 19h8"/></svg>`,
         archives: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="2"></circle></svg>`,
         manual: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>`,
-        gci: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 4.5c-1.5 2.5-3 5-3 7.5s1.5 5 3 7.5M18 6c-1.5 2.5-3 5-3 7.5s1.5 5 3 7.5M14.5 8c-1.5 2.5-3 5-3 7.5s1.5 5 3 7.5"/><path d="M2.5 4.5c1.5 2.5 3 5 3 7.5s-1.5 5-3 7.5M6 6c1.5 2.5 3 5 3 7.5s-1.5 5-3 7.5M9.5 8c1.5 2.5 3 5 3 7.5s-1.5 5-3 7.5"/></svg>`,
+        gci: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M12 12a4.4 4.4 0 100-8.8 4.4 4.4 0 000 8.8zM2.5 12C2.5 7 7 2.5 12 2.5S21.5 7 21.5 12M12 18s-4-2-4-6c0-2.2 1.8-4 4-4s4 1.8 4 4c0 4-4 6-4 6z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" fill="currentColor"/></svg>`,
         primarch: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10c0-2-1-4-3-5.5s-4.5-3-6.5-3-4.5 1.5-6.5 3S2 10 2 12"/><path d="M12 2a10 10 0 1 1-10 10c0-2 1-4 3-5.5s4.5-3 6.5-3 4.5 1.5 6.5 3 3 3.5 3 5.5"/><circle cx="12" cy="12" r="3.5"/></svg>`,
         neofetch: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12m-10 0a10 10 0 1 0 20 0a10 10 0 1 0-20 0"/><path d="M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>`,
         shutdown: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>`
     };
     
-    // OG Passwords for Archives
-    const passwordVault = { 'ARKLAY_88': '/index1.html', 'PROGENITOR': '/_index2.html', 'UROBOROS': '/index3.html', 'CADOU_PARASITE': '/index4.html', 'ISHIMURA_USG': '/index5.html', 'AEGIS_7': '/index6.html', 'LUNAR_PYRAMID': '/index7.html', 'KENDALL_44': '/index8.html', 'BYRGENWERTH': '/index9.html', 'MOON_PRESENCE': '/index10.html' };
+    // Corrected paths for Secure Archives
+    const passwordVault = {
+        'ARKLAY_88': 'gci/index1.html', 'PROGENITOR': 'gci/index2.html', 'UROBOROS': 'gci/index3.html',
+        'CADOU_PARASITE': 'gci/index4.html', 'ISHIMURA_USG': 'gci/index5.html', 'AEGIS_7': 'gci/index6.html',
+        'LUNAR_PYRAMID': 'gci/index7.html', 'KENDALL_44': 'gci/index8.html', 'BYRGENWERTH': 'gci/index9.html',
+        'MOON_PRESENCE': 'gci/index10.html'
+    };
 
     const APPS = [
-        { id: 'terminal', name: 'Terminal', icon: ICONS.terminal, content: `<div class="terminal-output" id="terminalOutput">TentacleOS [Version 5.0]\n\n</div><div class="terminal-input-line"><span class="terminal-prompt">operator@tentacle-os:~$</span><input type="text" class="terminal-command" id="terminalInput"></div>`, init: termInit },
-        { id: 'archives', name: 'Secure Archives', icon: ICONS.archives, content: `<div class="terminal-output" id="secureConsoleOutput">SECURE ARCHIVAL NODE\nAUTHORIZATION REQUIRED\n\nENTER KEYPHRASE:</div><div class="terminal-input-line"><input type="password" class="terminal-command" id="secure-console-input"></div>`, init: secureConsoleInit },
+        { id: 'terminal', name: 'Terminal', icon: ICONS.terminal, content: `<div class="terminal-output" id="terminalOutput"></div><div style="display:flex;"><span class="terminal-prompt">operator@tentacle-os:~$</span><input type="text" class="terminal-command" id="terminalInput"></div>`, init: termInit },
+        { id: 'archives', name: 'Secure Archives', icon: ICONS.archives, content: `<div class="terminal-output" id="secureConsoleOutput"></div><div class="terminal-input-line"><input type="password" class="terminal-command" id="secure-console-input" placeholder="ENTER KEYPHRASE..."></div>`, init: secureConsoleInit },
         { id: 'manual', name: 'Manual Pages', icon: ICONS.manual, content: `<pre>TENTACLEOS(1)         USER COMMANDS         TENTACLEOS(1)
 
 NAME
-       tentacleos - The primary shell of the Omni-Core.
+        tentacleos - The primary shell of the Omni-Core.
 
 COMMANDS
-       help       Display this message.
-       clear      Clear the terminal screen.
-       neofetch   Display system information.
-       phase      Shift reality phase [0-3].
-       primarch   Attempt to interface with the Primarch.
+        help          Display this message.
+        clear         Clear the terminal screen.
+        neofetch      Display system information.
+        phase [0-3]   Shift reality phase.
+        primarch      Attempt to interface with the Primarch.
 </pre>`},
         { id: 'gci', name: 'GCI Interface', icon: ICONS.gci, type: 'link', url: 'gci/index.html' },
-        { id: 'primarch', name: 'PRIMARCH Protocol', icon: ICONS.primarch, type: 'action', action: () => { getEl('primarchStatus').textContent = 'PRIMARCH: ACTIVE'; getEl('primarchStatus').classList.add('primarch'); }},
+        { id: 'primarch', name: 'PRIMARCH Protocol', icon: ICONS.primarch, type: 'action', action: () => { const el = getEl('primarchStatus'); el.textContent = 'PRIMARCH: ACTIVE'; el.classList.add('primarch'); }},
         { id: 'neofetch', name: 'neofetch', icon: ICONS.neofetch, content: `<div class="neofetch-logo"><pre>
-    .---.
-   /  .  \\
-   |  |  |
-   |  .  |
-   '-----'
-  /-------\\
- /         \\
-|           |
-|           |
-|           |
- \\         /
-  '-------'
-</pre></div><div class="neofetch-info"><div><span>operator@tentacle-os</span></div><div>--------------</div><div><span>OS:</span> TentacleOS 5.0 Omni-Core</div><div><span>Host:</span> Quantum Mainframe 7</div><div><span>Kernel:</span> 6.6.6-tentacle</div><div><span>Uptime:</span> 42 days, 6 hours, 9 mins</div><div><span>Shell:</span> omni-sh</div><div><span>Resolution:</span> Reality-Scaled</div><div><span>CPU:</span> Quantum Neural Processor</div><div><span>GPU:</span> Manifold Graphics Array</div></div>` },
+    ,___,
+    (o,o)
+   /'_'\`
+   \~_~/
+  / \` '\`
+ /  \`   \`
+/    \`   |
+(     \`   \\
+ \     \   \\
+  \     \   \`
+   \_____\_ /
+</pre></div><div class="neofetch-info"><div><span>operator@tentacle-os</span></div><div>--------------</div><div><span>OS:</span> TentacleOS 5.1 Omni-Core</div><div><span>Host:</span> Quantum Mainframe 7</div><div><span>Kernel:</span> 6.6.6-tentacle</div><div><span>Uptime:</span> 42 days, 6 hours, 9 mins</div><div><span>Shell:</span> omni-sh</div><div><span>Resolution:</span> Reality-Scaled</div><div><span>CPU:</span> Quantum Neural Processor</div><div><span>GPU:</span> Manifold Graphics Array</div></div>` },
         { id: 'shutdown', name: 'Shutdown', icon: ICONS.shutdown, type: 'action', action: shutdownSystem }
     ];
 
@@ -161,9 +224,86 @@ COMMANDS
     const activeWindows = {}, getEl = id => document.getElementById(id);
     const bootScreen = getEl('bootScreen'), desktopBg = getEl('desktopBg'), desktopIconsContainer = getEl('desktopIcons'), startMenuContent = getEl('startMenuContent'), windowContainer = getEl('windowContainer'), startButton = document.querySelector('.start-button'), startMenu = getEl('startMenu');
     
-    // --- OG Script Features: Phase Shifting ---
+    // --- Canvas Tentacle Animation ---
+    const canvas = getEl('tentacleCanvas');
+    const ctx = canvas.getContext('2d');
+    let tentacles = [];
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    class Tentacle {
+        constructor(x, y) {
+            this.x = x; this.y = y;
+            this.segments = [];
+            this.length = Math.random() * 200 + 100;
+            this.angle = Math.random() * Math.PI * 2;
+            this.speed = Math.random() * 0.5 + 0.2;
+            this.color = Math.random() > 0.5 ? 'rgba(0, 229, 255, 0.4)' : 'rgba(255, 0, 229, 0.4)';
+            this.life = 1;
+            this.decay = 0.002;
+        }
+
+        update() {
+            this.angle += (Math.random() - 0.5) * 0.2;
+            this.x += Math.cos(this.angle) * this.speed;
+            this.y += Math.sin(this.angle) * this.speed;
+
+            if(this.x < 0) this.x = canvas.width; if(this.x > canvas.width) this.x = 0;
+            if(this.y < 0) this.y = canvas.height; if(this.y > canvas.height) this.y = 0;
+            
+            this.segments.unshift({x: this.x, y: this.y});
+            if (this.segments.length > this.length) this.segments.pop();
+
+            this.life -= this.decay;
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.moveTo(this.segments[0].x, this.segments[0].y);
+            for (let i = 1; i < this.segments.length; i++) {
+                ctx.lineTo(this.segments[i].x, this.segments[i].y);
+            }
+            ctx.strokeStyle = this.color.replace('0.4', this.life * 0.4);
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+    }
+
+    function animateTentacles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (tentacles.length < 50 && Math.random() > 0.9) {
+            tentacles.push(new Tentacle(Math.random() * canvas.width, Math.random() * canvas.height));
+        }
+
+        tentacles.forEach((tentacle, index) => {
+            tentacle.update();
+            tentacle.draw();
+            if (tentacle.life <= 0) tentacles.splice(index, 1);
+        });
+        requestAnimationFrame(animateTentacles);
+    }
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+    
+    // --- Utility Functions ---
+    async function typeWriter(element, text, delay = 50) {
+        return new Promise(resolve => {
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, delay);
+                } else {
+                    resolve();
+                }
+            }
+            type();
+        });
+    }
+
+    // --- Phase Shifting ---
     function setPhase(phaseIndex) {
-        currentPhase = phaseIndex % 4; // Cycle through 4 phases
+        currentPhase = phaseIndex % 4;
         desktopBg.className = `desktop-bg phase-${currentPhase}`;
         getEl('phaseStatus').textContent = `PHASE: ${currentPhase}`;
     }
@@ -174,33 +314,38 @@ COMMANDS
     function initBoot() {
         getEl('bootLogoSVG').innerHTML = ICONS.logo;
         document.querySelector('.start-button .start-icon').innerHTML = ICONS.logo;
-        // Boot text logic here...
         const bootText = getEl('bootText');
         const progressFill = getEl('progressFill');
-        const bootLines = ["Calibrating psychic dampeners...","[0.1337] Hive-mind link detected. Status: DORMANT","[0.2451] Reality anchor initializing...","[0.5890] Non-Euclidean geometry drivers... loaded.","[0.7101] WARNING: Memetic hazard detected in boot sector.","[0.8432] Purging cognitive intrusion... OK","[1.2131] Synchronizing with local timeline.","[1.5000] Welcome, Operator. The flesh is a machine."];
+        const bootLines = ["[0.1337] Hive-mind link detected. Status: DORMANT","[0.2451] Reality anchor initializing...","[0.5890] Non-Euclidean geometry drivers... loaded.","[0.7101] WARNING: Memetic hazard detected in boot sector.","[0.8432] Purging cognitive intrusion... OK","[1.2131] Synchronizing with local timeline.","[1.5000] Welcome, Operator. The flesh is a machine."];
         let lineIndex = 0;
-        const bootInterval = setInterval(() => {
-            if (lineIndex < bootLines.length) {
-                const line = bootLines[lineIndex++];
+        
+        const typeBootLines = async () => {
+            for (const line of bootLines) {
                 const color = line.includes('WARNING') ? 'var(--accent-red)' : 'var(--accent-green)';
-                bootText.innerHTML += `<span style="color:${color}">${line}</span><br>`;
+                const span = document.createElement('span');
+                span.style.color = color;
+                bootText.appendChild(span);
+                await typeWriter(span, line, 10);
+                bootText.innerHTML += '<br>';
                 bootText.scrollTop = bootText.scrollHeight;
+                lineIndex++;
                 progressFill.style.width = (lineIndex / bootLines.length) * 100 + '%';
-            } else {
-                clearInterval(bootInterval);
-                setTimeout(() => { bootScreen.style.opacity = '0'; setTimeout(() => { bootScreen.style.display = 'none'; initDesktop(); }, 1000); }, 500);
             }
-        }, 300);
+            setTimeout(() => { bootScreen.style.opacity = '0'; setTimeout(() => { bootScreen.style.display = 'none'; initDesktop(); }, 1500); }, 500);
+        };
+        typeBootLines();
     }
 
     function initDesktop() {
         APPS.forEach(app => {
+            // Desktop Icon
             const iconEl = document.createElement('div');
             iconEl.className = 'desktop-icon';
             iconEl.innerHTML = `<div class="desktop-icon-image">${app.icon}</div><div class="desktop-icon-label">${app.name}</div>`;
             iconEl.addEventListener('dblclick', () => launchApp(app.id));
             desktopIconsContainer.appendChild(iconEl);
 
+            // Start Menu Item
             const itemEl = document.createElement('div');
             itemEl.className = 'menu-item';
             itemEl.innerHTML = `<div class="menu-item-icon">${app.icon}</div><span>${app.name}</span>`;
@@ -208,7 +353,9 @@ COMMANDS
             startMenuContent.appendChild(itemEl);
         });
         
+        animateTentacles();
         setInterval(updateSystemInfo, 3000);
+        updateSystemInfo();
         getEl('systemTime').textContent = new Date().toLocaleTimeString('en-GB');
         setInterval(() => getEl('systemTime').textContent = new Date().toLocaleTimeString('en-GB'), 1000);
     }
@@ -236,36 +383,71 @@ COMMANDS
         if (activeWindows[app.id]) { focusWindow(app.id); return; }
         const win = document.createElement('div');
         win.id = `${app.id}Window`; win.className = 'window';
-        win.style.left = `${100 + Math.random() * 200}px`; win.style.top = `${50 + Math.random() * 150}px`; win.style.zIndex = ++windowZIndex;
+        win.style.left = `${100 + Math.random() * (window.innerWidth - 600)}px`;
+        win.style.top = `${50 + Math.random() * (window.innerHeight - 500)}px`;
+        win.style.zIndex = ++windowZIndex;
         win.innerHTML = `<div class="window-titlebar"><div><span class="window-titlebar-icon">${app.icon}</span><span>${app.name}</span></div><div class="window-controls"><div class="window-control" data-action="close">×</div></div></div><div class="window-content">${app.content || ''}</div>`;
-        windowContainer.appendChild(win); activeWindows[app.id] = win;
+        windowContainer.appendChild(win);
+        activeWindows[app.id] = win;
+        
         win.querySelector('.window-titlebar').addEventListener('mousedown', e => onDragStart(e, win));
         win.addEventListener('mousedown', () => focusWindow(app.id));
         win.querySelector('.window-control[data-action="close"]').onclick = () => closeWindow(app.id);
+        
         if (app.init) app.init(win);
     }
-    function closeWindow(appId) { const win = activeWindows[appId]; if (win) { win.style.animation = 'open-window 0.3s reverse'; setTimeout(() => { win.remove(); delete activeWindows[appId]; }, 300); } }
+    
+    function closeWindow(appId) {
+        const win = activeWindows[appId];
+        if (win) {
+            win.style.animation = 'close-window 0.3s forwards';
+            setTimeout(() => {
+                win.remove();
+                delete activeWindows[appId];
+            }, 300);
+        }
+    }
+    
     function focusWindow(appId) { if (activeWindows[appId]) activeWindows[appId].style.zIndex = ++windowZIndex; }
-    function onDragStart(e, win) { if (e.target.closest('.window-control')) return; focusWindow(win.id.replace('Window', '')); const offsetX = e.clientX - win.offsetLeft, offsetY = e.clientY - win.offsetTop; const onDrag = (moveEvent) => { win.style.left = `${moveEvent.clientX - offsetX}px`; win.style.top = `${moveEvent.clientY - offsetY}px`; }; document.addEventListener('mousemove', onDrag); document.addEventListener('mouseup', () => document.removeEventListener('mousemove', onDrag), { once: true }); }
-    function shutdownSystem(){ bootScreen.innerHTML = `<div class="boot-logo" style="color:var(--accent-red);">${ICONS.shutdown}</div><div style="font-size:24px; color:var(--accent-red);">CONNECTION SEVERED</div>`; bootScreen.style.opacity='1'; bootScreen.style.display='flex'; }
+    
+    function onDragStart(e, win) {
+        if (e.target.closest('.window-control')) return;
+        focusWindow(win.id.replace('Window', ''));
+        const offsetX = e.clientX - win.offsetLeft;
+        const offsetY = e.clientY - win.offsetTop;
+        const onDrag = (moveEvent) => {
+            win.style.left = `${moveEvent.clientX - offsetX}px`;
+            win.style.top = `${moveEvent.clientY - offsetY}px`;
+        };
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', () => document.removeEventListener('mousemove', onDrag), { once: true });
+    }
+    
+    function shutdownSystem(){
+        bootScreen.innerHTML = `<div class="boot-logo" style="color:var(--accent-red);">${ICONS.shutdown}</div><div style="font-size:24px; color:var(--accent-red);">CONNECTION SEVERED</div>`;
+        bootScreen.style.opacity='1';
+        bootScreen.style.display='flex';
+        setTimeout(() => document.body.innerHTML = '', 2000);
+    }
     
     // --- App Init Functions ---
-    function termInit(win) {
+    async function termInit(win) {
         const input = win.querySelector('#terminalInput'), output = win.querySelector('#terminalOutput');
         input.focus();
+        await typeWriter(output, 'TentacleOS [Version 5.1]\nType "help" for a list of commands.\n\n', 20);
         input.addEventListener('keydown', e => {
             if (e.key === 'Enter' && input.value) {
                 const userInput = input.value.trim();
                 const [cmd, arg] = userInput.toLowerCase().split(' ');
-                output.innerHTML += `<div class="input" style="color:var(--accent-cyan)">operator@tentacle-os:~$ ${userInput}</div>`;
+                output.innerHTML += `<div class="input"><span style="color:var(--accent-cyan)">operator@tentacle-os:~$</span> ${userInput}</div>`;
                 input.value = '';
 
                 let response = `<div style="color:var(--accent-red)">command not found: ${cmd}</div>`;
-                if (cmd === 'help') response = `<div>Commands: help, clear, neofetch, phase [0-3]</div>`;
+                if (cmd === 'help') response = `<div>Commands: help, clear, neofetch, phase [0-3], primarch</div>`;
                 if (cmd === 'clear') { output.innerHTML = ''; return; }
-                if (cmd === 'neofetch') { launchApp('neofetch'); return; }
-                if (cmd === 'phase' && arg && !isNaN(arg)) { setPhase(parseInt(arg)); response = `<div>Phase shifted to ${currentPhase}</div>`; }
-                if (cmd === 'primarch') { launchApp('primarch'); response = `<div>Attempting to interface...</div>`; }
+                if (cmd === 'neofetch') { launchApp('neofetch'); response = ''; }
+                if (cmd === 'phase' && arg && !isNaN(arg)) { setPhase(parseInt(arg)); response = `<div>Reality phase shifted to ${currentPhase}</div>`; }
+                if (cmd === 'primarch') { launchApp('primarch'); response = `<div>Interfacing with the Primarch...</div>`; }
                 
                 output.innerHTML += response;
                 output.scrollTop = output.scrollHeight;
@@ -273,25 +455,31 @@ COMMANDS
         });
     }
 
-    function secureConsoleInit(win) {
+    async function secureConsoleInit(win) {
         const input = win.querySelector('#secure-console-input'), output = win.querySelector('#secureConsoleOutput');
         input.focus();
+        await typeWriter(output, 'SECURE ARCHIVAL NODE :: AUTHORIZATION REQUIRED\n\n', 20);
+        
         input.addEventListener('keydown', e => {
             if (e.key === 'Enter' && input.value) {
-                const cmd = input.value.trim().toUpperCase();
+                const key = input.value.trim().toUpperCase();
                 input.value = '';
-                if (passwordVault[cmd]) {
-                    output.innerHTML += `\n> KEY ACCEPTED.\n<span style="color:var(--accent-green)">DECRYPTING... OPENING FILE...</span>\n`;
-                    setTimeout(() => window.open(passwordVault[cmd], '_blank'), 1000);
+                if (passwordVault[key]) {
+                    output.innerHTML += `> KEY ACCEPTED.\n<span style="color:var(--accent-green)">DECRYPTING... OPENING FILE...</span>\n\n`;
+                    setTimeout(() => window.open(passwordVault[key], '_blank'), 1000);
                 } else {
-                    output.innerHTML += `\n> KEY REJECTED.\n<span style="color:var(--accent-red)">ACCESS DENIED.</span>\n`;
+                    output.innerHTML += `> KEY REJECTED.\n<span style="color:var(--accent-red)">ACCESS DENIED.</span>\n\n`;
                 }
-                setTimeout(() => output.innerHTML += `\nENTER KEYPHRASE:`, 1000);
+                output.scrollTop = output.scrollHeight;
             }
         });
     }
     
-    function toggleStartMenu(state){ startMenuOpen = state !== undefined ? state : !startMenuOpen; startMenu.classList.toggle('active', startMenuOpen); startButton.classList.toggle('active', startMenuOpen); }
+    function toggleStartMenu(state){
+        startMenuOpen = state !== undefined ? state : !startMenuOpen;
+        startMenu.classList.toggle('active', startMenuOpen);
+        startButton.classList.toggle('active', startMenuOpen);
+    }
     startButton.addEventListener('click', e => { e.stopPropagation(); toggleStartMenu(); });
     document.addEventListener('click', () => { if (startMenuOpen) toggleStartMenu(false); });
 
