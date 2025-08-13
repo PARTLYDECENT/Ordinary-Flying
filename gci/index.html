@@ -145,16 +145,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
 <div id="pause-menu">
         <h2>⚡ TACTICAL PAUSE ⚡</h2>
         <div class="menu-item">
@@ -219,9 +209,63 @@
                     output.innerHTML = '<div style="color: #00ff00;">ACCESS GRANTED</div><div style="margin-top: 10px;">DARKSTAR COMMAND INTERFACE ACTIVE</div><div style="margin-top: 5px;">Awaiting orders...</div>';
                     this.value = '';
                 } else if (authenticated && input === 'darkstar1') {
-                    output.innerHTML += '<div style="color: #00ff00; margin-top: 10px;">INITIATING DARKSTAR PROTOCOL...</div><div style="color: #ffff00;">Redirecting to classified interface...</div>';
+                    output.innerHTML += '<div style="color: #00ff00; margin-top: 10px;">INITIATING DARKSTAR PROTOCOL 1...</div><div style="color: #ffff00;">Redirecting to classified interface...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'index1.html';
+                    }, 2000);
+                    this.value = '';
+                } else if (authenticated && input === 'darkstar2') {
+                    output.innerHTML += '<div style="color: #00ff00; margin-top: 10px;">INITIATING DARKSTAR PROTOCOL 2...</div><div style="color: #ffff00;">Redirecting to classified interface...</div>';
                     setTimeout(() => {
                         window.location.href = 'index2.html';
+                    }, 2000);
+                    this.value = '';
+                } else if (authenticated && input === 'darkstar3') {
+                    output.innerHTML += '<div style="color: #00ff00; margin-top: 10px;">INITIATING DARKSTAR PROTOCOL 3...</div><div style="color: #ffff00;">Redirecting to classified interface...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'index3.html';
+                    }, 2000);
+                    this.value = '';
+                } else if (authenticated && input === 'darkstar4') {
+                    output.innerHTML += '<div style="color: #00ff00; margin-top: 10px;">INITIATING DARKSTAR PROTOCOL 4...</div><div style="color: #ffff00;">Redirecting to classified interface...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'index4.html';
+                    }, 2000);
+                    this.value = '';
+                } else if (authenticated && input === 'darkstar5') {
+                    output.innerHTML += '<div style="color: #00ff00; margin-top: 10px;">INITIATING DARKSTAR PROTOCOL 5...</div><div style="color: #ffff00;">Redirecting to classified interface...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'index5.html';
+                    }, 2000);
+                    this.value = '';
+                } else if (authenticated && input === 'darkstar6') {
+                    output.innerHTML += '<div style="color: #00ff00; margin-top: 10px;">INITIATING DARKSTAR PROTOCOL 6...</div><div style="color: #ffff00;">Redirecting to classified interface...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'index6.html';
+                    }, 2000);
+                    this.value = '';
+                } else if (authenticated && input === 'darkstar7') {
+                    output.innerHTML += '<div style="color: #00ff00; margin-top: 10px;">INITIATING DARKSTAR PROTOCOL 7...</div><div style="color: #ffff00;">Redirecting to classified interface...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'index7.html';
+                    }, 2000);
+                    this.value = '';
+                } else if (authenticated && input === 'darkstar8') {
+                    output.innerHTML += '<div style="color: #00ff00; margin-top: 10px;">INITIATING DARKSTAR PROTOCOL 8...</div><div style="color: #ffff00;">Redirecting to classified interface...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'index8.html';
+                    }, 2000);
+                    this.value = '';
+                } else if (authenticated && input === 'darkstar9') {
+                    output.innerHTML += '<div style="color: #00ff00; margin-top: 10px;">INITIATING DARKSTAR PROTOCOL 9...</div><div style="color: #ffff00;">Redirecting to classified interface...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'index9.html';
+                    }, 2000);
+                    this.value = '';
+                } else if (authenticated && input === 'darkstar10') {
+                    output.innerHTML += '<div style="color: #00ff00; margin-top: 10px;">INITIATING DARKSTAR PROTOCOL 10...</div><div style="color: #ffff00;">Redirecting to classified interface...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'index10.html';
                     }, 2000);
                     this.value = '';
                 } else if (!authenticated) {
@@ -234,9 +278,6 @@
             }
         });
     </script>
-
-
-
 
 
 
